@@ -279,6 +279,15 @@ class WumpusWorldGUI:
         self.master.bind("<Left>", self.on_turn_left)
         self.master.bind("<Right>", self.on_turn_right)
         self.master.bind("<Return>", self.on_move_forward)
+        
+        self.display_usage_instructions()
+        
+    def display_usage_instructions(self):
+        instructions = (
+            "Arrow Keys: Turn Left/Right\n"
+            "Enter: Move Forward\n"
+        )
+        self.message_label.config(text=instructions)
 
     def draw_grid(self):
         for i in range(GRID_SIZE):
