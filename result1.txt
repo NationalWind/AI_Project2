@@ -1,0 +1,45 @@
+(1,1): turn right
+(2,1): move forward
+(2,1): turn left
+(2,2): move forward
+(2,3): move forward
+(2,4): move forward
+(2,5): move forward
+(2,5): turn left
+(1,5): move forward
+(1,5): grab
+(1,5): turn right
+(1,5): turn right
+(2,5): move forward
+(2,5): turn right
+(2,4): move forward
+(2,3): move forward
+(2,2): move forward
+(2,1): move forward
+(2,1): turn left
+(2,1): turn right
+(2,1): turn right
+(2,1): turn right
+(2,1): turn right
+(2,1): turn right
+(2,1): turn right
+(2,1): turn right
+(2,2): move forward
+(2,2): turn right
+(2,2): turn right
+(2,1): move forward
+(2,1): turn right
+(2,1): turn right
+(2,2): move forward
+(2,3): move forward
+(2,3): grab
+(2,3): turn right
+(2,3): turn right
+(2,2): move forward
+(2,1): move forward
+(2,1): turn left
+(2,1): turn left
+(2,1): turn left
+(1,1): move forward
+(1,1): climb
+Game points: 4590

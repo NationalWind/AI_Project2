@@ -34,7 +34,7 @@ class Program:
             ['-', '-', 'W', '-', 'P', '-', '-', 'P_G', '-', '-'],
             ['-', '-', '-', '-', '-', '-', '-', '-', '-', '-'],
             ['-', '-', '-', '-', 'H_P', '-', '-', '-', '-', '-'],
-            ['-', 'G', 'W', '-', '-', '-', 'P', '-', '-', '-'],
+            ['-', 'G', 'WH_P', '-', '-', '-', 'P', '-', '-', '-'],
             ['-', '-', '-', '-', 'P_G', '-', '-', '-', '-', '-'],
             ['H_P', '-', '-', '-', '-', 'W', '-', '-', 'H_P', '-'],
             ['P', '-', 'P', '-', 'P', '-', '-', '-', '-', '-'],
@@ -121,6 +121,7 @@ class Agent:
         self.gold_collected = False
         self.arrows = ARROW_COUNT
         self.direction = "up"  # Initial direction
+        self.healing_potions = 0  # Track healing potions
 
     def get_current_info(self):
         return self.program.get_cell_info(self.x, self.y)
@@ -170,6 +171,7 @@ class Agent:
             self.actions.append(action_str)
             return "gold"
         elif 'H_P' in cell_info:
+            self.healing_potions += 1
             self.program.set_cell_info(self.x, self.y, cell_info.replace('H_P', ''))
             action_str = f"({self.y + 1},{GRID_SIZE - self.x}): grab"
             self.program.update_map_after_grab(self.x, self.y)
@@ -213,9 +215,9 @@ class Agent:
         return "not at start"
 
     def heal(self):
-        if 'H_P' in self.get_current_info():
+        if self.healing_potions > 0:  # Check if there are healing potions available
             self.health = min(self.health + HEALTH_RESTORE, MAX_HEALTH)
-            self.program.set_cell_info(self.x, self.y, self.get_current_info().replace('H_P', ''))
+            self.healing_potions -= 1  # Use one healing potion
             action_str = f"({self.y + 1},{GRID_SIZE - self.x}): heal"
             self.actions.append(action_str)
             return "healed"
@@ -258,8 +260,10 @@ class WumpusWorldGUI:
         self.arrow_label.pack(side="top", anchor="w", padx=10, pady=10)
         self.gold_label = tk.Label(master, text="Gold: Not Collected", fg="gold")
         self.gold_label.pack(side="top", anchor="w", padx=10, pady=10)
-        self.points_label = tk.Label(master, text=f"Points: {self.agent.game_points}", fg="black")
+        self.points_label = tk.Label(master, text=f"Score: {self.agent.game_points}", fg="black")
         self.points_label.pack(side="top", anchor="w", padx=10, pady=10)
+        self.potions_label = tk.Label(master, text=f"Healing Potions: {self.agent.healing_potions}", fg="orange")
+        self.potions_label.pack(side="top", anchor="w", padx=10, pady=10)
 
         # Control Buttons
         self.button_frame = tk.Frame(master)
@@ -343,7 +347,8 @@ class WumpusWorldGUI:
         self.health_label.config(text=f"Health: {self.agent.health}")
         self.arrow_label.config(text=f"Arrows: {self.agent.arrows}")
         self.gold_label.config(text=f"Gold: {'Collected' if self.agent.gold_collected else 'Not Collected'}")
-        self.points_label.config(text=f"Points: {self.agent.game_points}")
+        self.points_label.config(text=f"Score: {self.agent.game_points}")
+        self.potions_label.config(text=f"Healing Potions: {self.agent.healing_potions}")
 
     def display_message(self, message):
         self.message_label.config(text=message)
