@@ -16,25 +16,40 @@ SCORE_AGENT_DIED = -10000
 SCORE_CLIMB_OUT = 10
 SCORE_ACTION = -10
 
-def transfer_base_map(base_map):
-    conversion_dict = {
-        'W': 'WU',
-        'P': 'PI',
-        'G': 'GO'
-    }
-    converted_map = [[conversion_dict.get(cell, cell) for cell in row] for row in base_map]
-    return converted_map
+def split_objects(cell_content):
+    objects = []
+    i = 0
+    while i < len(cell_content):
+        if cell_content[i:i+3] == "H_P":  
+            objects.append("H_P")
+            i += 3
+        elif cell_content[i:i+3] == "P_G": 
+            objects.append("P_G")
+            i += 3
+        elif cell_content[i:i+3] == "G_L": 
+            objects.append("G_L")
+            i += 3
+        elif cell_content[i:i+3] == "W_H": 
+            objects.append("W_H")
+            i += 3
+        else:
+            objects.append(cell_content[i])
+            i += 1
+    return objects
+
+
+
 
 class Program:
     def __init__(self):
         self.map = self.generate_map()
 
     def generate_map(self):
-        ori_map = [
-            ['-', '-', 'W', '-', 'P', '-', '-', 'P_G', '-', '-'],
+        base_map = [
+            ['-', '-', 'WH_P', '-', 'P', '-', '-', 'P_G', '-', '-'],
             ['-', '-', '-', '-', '-', '-', '-', '-', '-', '-'],
             ['-', '-', '-', '-', 'H_P', '-', '-', '-', '-', '-'],
-            ['-', 'G', 'WH_P', '-', '-', '-', 'P', '-', '-', '-'],
+            ['-', 'GH_P', 'WH_P', '-', '-', '-', 'P', '-', '-', '-'],
             ['-', '-', '-', '-', 'P_G', '-', '-', '-', '-', '-'],
             ['H_P', '-', '-', '-', '-', 'W', '-', '-', 'H_P', '-'],
             ['P', '-', 'P', '-', 'P', '-', '-', '-', '-', '-'],
@@ -42,7 +57,6 @@ class Program:
             ['-', '-', 'W', '-', '-', '-', '-', 'W', '-', '-'],
             ['A', '-', '-', 'P_G', '-', 'P', '-', '-', '-', '-']
         ]
-        base_map = transfer_base_map(ori_map)
 
         percept_map = [['' for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)]
 
@@ -53,30 +67,32 @@ class Program:
 
         for i in range(GRID_SIZE):
             for j in range(GRID_SIZE):
-                if base_map[i][j] == 'WU':
-                    add_percept(i, j, 'S')     # Add Stench to the Wumpus cell itself
-                    add_percept(i-1, j, 'S')  # Stench around Wumpus
-                    add_percept(i+1, j, 'S')
-                    add_percept(i, j-1, 'S')
-                    add_percept(i, j+1, 'S')
-                elif base_map[i][j] == 'PI':
-                    add_percept(i, j, 'B')     # Add Breeze to the Pit cell itself
-                    add_percept(i-1, j, 'B')  # Breeze around Pit
-                    add_percept(i+1, j, 'B')
-                    add_percept(i, j-1, 'B')
-                    add_percept(i, j+1, 'B')
-                elif base_map[i][j] == 'P_G':
-                    add_percept(i, j, 'W_H')     # Add Whiff to the Poisonous Gas cell itself
-                    add_percept(i-1, j, 'W_H')  # Whiff around Poisonous Gas
-                    add_percept(i+1, j, 'W_H')
-                    add_percept(i, j-1, 'W_H')
-                    add_percept(i, j+1, 'W_H')
-                elif base_map[i][j] == 'H_P':
-                    add_percept(i, j, 'G_L')   # Add Glow to the Healing Potions cell itself
-                    add_percept(i-1, j, 'G_L') # Glow around Healing Potions
-                    add_percept(i+1, j, 'G_L')
-                    add_percept(i, j-1, 'G_L')
-                    add_percept(i, j+1, 'G_L')
+                cell_objects = split_objects(base_map[i][j])
+                for obj in cell_objects:
+                    if obj == 'W':
+                        add_percept(i, j, 'S')     # Add Stench to the Wumpus cell itself
+                        add_percept(i-1, j, 'S')  # Stench around Wumpus
+                        add_percept(i+1, j, 'S')
+                        add_percept(i, j-1, 'S')
+                        add_percept(i, j+1, 'S')
+                    elif obj == 'P':
+                        add_percept(i, j, 'B')     # Add Breeze to the Pit cell itself
+                        add_percept(i-1, j, 'B')  # Breeze around Pit
+                        add_percept(i+1, j, 'B')
+                        add_percept(i, j-1, 'B')
+                        add_percept(i, j+1, 'B')
+                    elif obj == 'P_G':
+                        add_percept(i, j, 'W_H')     # Add Whiff to the Poisonous Gas cell itself
+                        add_percept(i-1, j, 'W_H')  # Whiff around Poisonous Gas
+                        add_percept(i+1, j, 'W_H')
+                        add_percept(i, j-1, 'W_H')
+                        add_percept(i, j+1, 'W_H')
+                    elif obj == 'H_P':
+                        add_percept(i, j, 'G_L')   # Add Glow to the Healing Potions cell itself
+                        add_percept(i-1, j, 'G_L') # Glow around Healing Potions
+                        add_percept(i+1, j, 'G_L')
+                        add_percept(i, j-1, 'G_L')
+                        add_percept(i, j+1, 'G_L')
 
         final_map = [['' for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)]
         for i in range(GRID_SIZE):
@@ -142,7 +158,8 @@ class Agent:
 
         # Check for Gold and Healing Potions
         cell_info = self.get_current_info()
-        if 'GO' in cell_info:
+        objects = split_objects(cell_info)
+        if 'G' in objects:
             return "gold"
         elif 'H_P' in cell_info:
             return "healing potion"
@@ -164,9 +181,10 @@ class Agent:
 
     def grab(self):
         cell_info = self.get_current_info()
-        if 'GO' in cell_info:
+        objects = split_objects(cell_info)
+        if 'G' in objects:
             self.gold_collected = True
-            self.program.set_cell_info(self.x, self.y, cell_info.replace('GO', ''))
+            self.program.set_cell_info(self.x, self.y, cell_info.replace('G', ''))
             action_str = f"({self.y + 1},{GRID_SIZE - self.x}): grab"
             self.actions.append(action_str)
             return "gold"
@@ -195,7 +213,9 @@ class Agent:
 
             nx, ny = self.x + dx, self.y + dy
             if 0 <= nx < GRID_SIZE and 0 <= ny < GRID_SIZE:
-                if 'WU' in self.program.get_cell_info(nx, ny):
+                cell_info = self.program.get_cell_info(nx, ny)
+                objects = split_objects(cell_info)
+                if 'W' in objects:
                     self.program.set_cell_info(nx, ny, self.program.get_cell_info(nx, ny).replace('W', ''))
                     self.program.update_map_after_wumpus_death(nx, ny)
                     action_str = f"({ny + 1},{GRID_SIZE - nx}): shoot"
@@ -225,11 +245,13 @@ class Agent:
 
     def check_cell(self):
         cell_info = self.get_current_info()
-        if 'WU' in cell_info:
+        objects = split_objects(cell_info)
+        print (objects)
+        if 'W' in objects:
             return "wumpus"
-        elif 'PI' in cell_info:
+        elif 'P' in objects:
             return "pit"
-        elif 'P_G' in cell_info:
+        elif 'P_G' in objects:
             self.health -= HEALTH_REDUCTION
             return "poisonous gas"
         return ""
