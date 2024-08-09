@@ -37,23 +37,22 @@ def split_objects(cell_content):
             i += 1
     return objects
 
-
-
-
 class Program:
     def __init__(self):
         self.map = self.generate_map()
+        self.wumpus_count_map = self.count_wumpuses()
+
 
     def generate_map(self):
         base_map = [
-            ['-', '-', 'WH_P', '-', 'P', '-', '-', 'P_G', '-', '-'],
+            ['-', '-', 'WH_PWW', '-', 'P', '-', '-', 'P_G', '-', '-'],
             ['-', '-', '-', '-', '-', '-', '-', '-', '-', '-'],
             ['-', '-', '-', '-', 'H_P', '-', '-', '-', '-', '-'],
             ['-', 'GH_P', 'WH_P', '-', '-', '-', 'P', '-', '-', '-'],
             ['-', '-', '-', '-', 'P_G', '-', '-', '-', '-', '-'],
             ['H_P', '-', '-', '-', '-', 'W', '-', '-', 'H_P', '-'],
-            ['P', '-', 'P', '-', 'P', '-', '-', '-', '-', '-'],
-            ['-', 'G', '-', '-', '-', '-', '-', '-', '-', '-'],
+            ['P', '-', 'P', '-', 'P', 'WP_GPH_P', '-', '-', '-', '-'],
+            ['-', 'GH_P', '-', '-', '-', '-', '-', '-', '-', '-'],
             ['-', '-', 'W', '-', '-', '-', '-', 'W', '-', '-'],
             ['A', '-', '-', 'P_G', '-', 'P', '-', '-', '-', '-']
         ]
@@ -64,6 +63,7 @@ class Program:
             if 0 <= x < GRID_SIZE and 0 <= y < GRID_SIZE:
                 if percept not in percept_map[x][y]:
                     percept_map[x][y] += percept
+    
 
         for i in range(GRID_SIZE):
             for j in range(GRID_SIZE):
@@ -104,6 +104,14 @@ class Program:
 
         return final_map
 
+    def count_wumpuses(self):
+            wumpus_count_map = [[0 for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)]
+            for i in range(GRID_SIZE):
+                for j in range(GRID_SIZE):
+                    cell_objects = split_objects(self.map[i][j])
+                    wumpus_count_map[i][j] = cell_objects.count('W')
+            return wumpus_count_map
+    
     def get_cell_info(self, x, y):
         return self.map[x][y]
 
@@ -111,13 +119,20 @@ class Program:
         self.map[x][y] = info
         
     def update_map_after_wumpus_death(self, x, y):
-        # Remove stench from the Wumpus cell and surrounding cells
-        for dx in [-1, 0, 1]:
-            for dy in [-1, 0, 1]:
-                nx, ny = x + dx, y + dy
-                if 0 <= nx < GRID_SIZE and 0 <= ny < GRID_SIZE:
-                    cell_info = self.get_cell_info(nx, ny)
-                    self.set_cell_info(nx, ny, cell_info.replace('S', ''))
+        # Reduce the count of Wumpuses in the cell
+        if self.wumpus_count_map[x][y] > 0:
+            self.wumpus_count_map[x][y] -= 1
+        print(self.wumpus_count_map[x][y])
+        
+        # If no more Wumpuses in the cell, remove stench from the Wumpus cell and surrounding cells
+        if self.wumpus_count_map[x][y] == 0:
+            self.set_cell_info(x, y, self.get_cell_info(x, y).replace('W', ''))
+            for dx in [-1, 0, 1]:
+                for dy in [-1, 0, 1]:
+                    nx, ny = x + dx, y + dy
+                    if 0 <= nx < GRID_SIZE and 0 <= ny < GRID_SIZE:
+                        cell_info = self.get_cell_info(nx, ny)
+                        self.set_cell_info(nx, ny, cell_info.replace('S', ''))
 
     def update_map_after_grab(self, x, y):
         # Remove glow from the Healing Potions cell
@@ -199,33 +214,29 @@ class Agent:
         return ""
 
     def shoot(self):
-        if self.arrows > 0:
-            self.arrows -= 1
-            dx, dy = 0, 0
-            if self.direction == "up":
-                dx, dy = -1, 0
-            elif self.direction == "down":
-                dx, dy = 1, 0
-            elif self.direction == "left":
-                dx, dy = 0, -1
-            elif self.direction == "right":
-                dx, dy = 0, 1
+        self.game_points += SCORE_SHOOT_ARROW
+        dx, dy = 0, 0
+        if self.direction == "up":
+            dx, dy = -1, 0
+        elif self.direction == "down":
+            dx, dy = 1, 0
+        elif self.direction == "left":
+            dx, dy = 0, -1
+        elif self.direction == "right":
+            dx, dy = 0, 1
 
-            nx, ny = self.x + dx, self.y + dy
-            if 0 <= nx < GRID_SIZE and 0 <= ny < GRID_SIZE:
-                cell_info = self.program.get_cell_info(nx, ny)
-                objects = split_objects(cell_info)
-                if 'W' in objects:
-                    self.program.set_cell_info(nx, ny, self.program.get_cell_info(nx, ny).replace('W', ''))
-                    self.program.update_map_after_wumpus_death(nx, ny)
-                    action_str = f"({ny + 1},{GRID_SIZE - nx}): shoot"
-                    self.actions.append(action_str)
-                    return "wumpus killed"
-            action_str = f"({ny + 1},{GRID_SIZE - nx}): shoot"
-            self.actions.append(action_str)
-            self.game_points += SCORE_SHOOT_ARROW
-            return "missed"
-        return "no arrows"
+        nx, ny = self.x + dx, self.y + dy
+        if 0 <= nx < GRID_SIZE and 0 <= ny < GRID_SIZE:
+            cell_info = self.program.get_cell_info(nx, ny)
+            objects = split_objects(cell_info)
+            if 'W' in objects:
+                self.program.update_map_after_wumpus_death(nx, ny)
+                action_str = f"({ny + 1},{GRID_SIZE - nx}): shoot"
+                self.actions.append(action_str)
+                return "wumpus killed"
+        action_str = f"({ny + 1},{GRID_SIZE - nx}): shoot"
+        self.actions.append(action_str)
+        return "missed"
 
     def climb(self):
         if (self.x, self.y) == (GRID_SIZE - 1, 0):  # Starting position
@@ -371,6 +382,7 @@ class WumpusWorldGUI:
         self.gold_label.config(text=f"Gold: {'Collected' if self.agent.gold_collected else 'Not Collected'}")
         self.points_label.config(text=f"Score: {self.agent.game_points}")
         self.potions_label.config(text=f"Healing Potions: {self.agent.healing_potions}")
+        
 
     def display_message(self, message):
         self.message_label.config(text=message)
