@@ -1,26 +1,6 @@
 (1,1): turn right
-(2,1): move forward
-(2,1): turn left
-(2,2): move forward
-(2,3): move forward
-(2,3): grab
-(2,4): move forward
-(2,5): move forward
-(2,6): move forward
-(2,6): turn left
-(1,6): move forward
-(1,6): turn right
-(1,7): move forward
-(1,8): move forward
-(1,8): turn right
-(2,8): move forward
-(3,8): move forward
-(4,8): move forward
-(5,8): move forward
-(5,8): grab
-(5,8): turn right
-(5,7): move forward
-(5,6): move forward
-(5,5): move forward
-(5,4): move forward
-Game points: -5240
+(1,1): turn left
+(1,2): move forward
+(1,3): move forward
+(1,4): move forward
+Game points: -10050
