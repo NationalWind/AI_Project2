@@ -1,41 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
-
-# Constants
-GRID_SIZE = 10
-CELL_SIZE = 65
-MAX_HEALTH = 100
-HEALTH_REDUCTION = 25
-HEALTH_RESTORE = 25
-ARROW_COUNT = float('inf')
-
-# Scoring Constants
-SCORE_PICKUP_GOLD = 5000
-SCORE_SHOOT_ARROW = -100
-SCORE_AGENT_DIED = -10000
-SCORE_CLIMB_OUT = 10
-SCORE_ACTION = -10
-
-def split_objects(cell_content):
-    objects = []
-    i = 0
-    while i < len(cell_content):
-        if cell_content[i:i+3] == "H_P":  
-            objects.append("H_P")
-            i += 3
-        elif cell_content[i:i+3] == "P_G": 
-            objects.append("P_G")
-            i += 3
-        elif cell_content[i:i+3] == "G_L": 
-            objects.append("G_L")
-            i += 3
-        elif cell_content[i:i+3] == "W_H": 
-            objects.append("W_H")
-            i += 3
-        else:
-            objects.append(cell_content[i])
-            i += 1
-    return objects
+from knowledgeBase import *
+from define import *
     
 class Agent:
     def __init__(self, program):
@@ -48,6 +14,54 @@ class Agent:
         self.arrows = ARROW_COUNT
         self.direction = "up"  # Initial direction
         self.healing_potions = 0  # Track healing potions
+        self.kb = KnowledgeBase(GRID_SIZE)
+
+    def update_knowledge_base(self, x, y):
+        cell_info = self.get_current_info()
+        objects = split_objects(cell_info)
+
+        # Update knowledge base for current cell
+        self.kb.add_proposition(x, y, 'W', 'W' in objects)
+        self.kb.add_proposition(x, y, 'P', 'P' in objects)
+        self.kb.add_proposition(x, y, 'G', 'G' in objects)
+        self.kb.add_proposition(x, y, 'P_G', 'P_G' in objects)
+        self.kb.add_proposition(x, y, 'H_P', 'H_P' in objects)
+        self.kb.add_proposition(x, y, 'B', 'B' in objects)
+        self.kb.add_proposition(x, y, 'S', 'S' in objects)
+        self.kb.add_proposition(x, y, 'W_H', 'W_H' in objects)
+        self.kb.add_proposition(x, y, 'G_L', 'G_L' in objects)
+
+        # Define directions
+        directions = {
+            "up": (-1, 0),
+            "down": (1, 0),
+            "left": (0, -1),
+            "right": (0, 1)
+        }
+        
+        # Check adjacent cells
+        for direction, (dx, dy) in directions.items():
+            nx, ny = self.x + dx, self.y + dy
+            if 0 <= nx < GRID_SIZE and 0 <= ny < GRID_SIZE:
+                adj_cell_info = self.program.get_cell_info(nx, ny)
+                adj_objects = split_objects(adj_cell_info)
+                
+                # Add implications for percepts
+                if 'B' in objects:
+                    # If Breeze, then at least one adjacent cell contains a Pit
+                    self.kb.add_clause(Or(self.kb.propositions[(nx, ny, 'P')]))
+                if 'S' in objects:
+                    # If Stench, then at least one adjacent cell contains a Wumpus
+                    self.kb.add_clause(Or(self.kb.propositions[(nx, ny, 'W')]))
+                if 'W_H' in objects:
+                    # If Whiff, then at least one adjacent cell contains Poisonous Gas
+                    self.kb.add_clause(Or(self.kb.propositions[(nx, ny, 'P_G')]))
+                if 'G_L' in objects:
+                    # If Glow, then at least one adjacent cell contains Health Potion
+                    self.kb.add_clause(Or(self.kb.propositions[(nx, ny, 'H_P')]))
+
+        # Infer new knowledge
+        # self.kb.infer()
 
     def get_current_info(self):
         return self.program.get_cell_info(self.x, self.y)
