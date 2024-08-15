@@ -2,7 +2,9 @@ import tkinter as tk
 from tkinter import messagebox
 from knowledgeBase import *
 from define import *
-    
+from collections import deque
+
+
 class Agent:
     def __init__(self, program):
         self.program = program
@@ -15,50 +17,40 @@ class Agent:
         self.direction = "up"  # Initial direction
         self.healing_potions = 0  # Track healing potions
         self.kb = KnowledgeBase(GRID_SIZE)
+        self.frontier = deque([(9, 0)])
+        self.known = [[[]] * 10 for _ in range(10)]
 
     def update_knowledge_base(self, x, y):
         cell_info = self.get_current_info()
         objects = split_objects(cell_info)
 
         # Update knowledge base for current cell
-        self.kb.add_proposition(x, y, 'W', 'W' in objects)
-        self.kb.add_proposition(x, y, 'P', 'P' in objects)
-        self.kb.add_proposition(x, y, 'G', 'G' in objects)
-        self.kb.add_proposition(x, y, 'P_G', 'P_G' in objects)
-        self.kb.add_proposition(x, y, 'H_P', 'H_P' in objects)
-        self.kb.add_proposition(x, y, 'B', 'B' in objects)
-        self.kb.add_proposition(x, y, 'S', 'S' in objects)
-        self.kb.add_proposition(x, y, 'W_H', 'W_H' in objects)
-        self.kb.add_proposition(x, y, 'G_L', 'G_L' in objects)
+        self.kb.add_proposition(x, y, "W", "W" in objects)
+        self.kb.add_proposition(x, y, "P", "P" in objects)
+        self.kb.add_proposition(x, y, "G", "G" in objects)
+        self.kb.add_proposition(x, y, "P_G", "P_G" in objects)
+        self.kb.add_proposition(x, y, "H_P", "H_P" in objects)
+        self.kb.add_proposition(x, y, "B", "B" in objects)
+        self.kb.add_proposition(x, y, "S", "S" in objects)
+        self.kb.add_proposition(x, y, "W_H", "W_H" in objects)
+        self.kb.add_proposition(x, y, "G_L", "G_L" in objects)
 
         # Define directions
-        directions = {
-            "up": (-1, 0),
-            "down": (1, 0),
-            "left": (0, -1),
-            "right": (0, 1)
-        }
-        
+        directions = {"up": (-1, 0), "down": (1, 0), "left": (0, -1), "right": (0, 1)}
+
         # Check adjacent cells
-        for direction, (dx, dy) in directions.items():
-            nx, ny = self.x + dx, self.y + dy
-            if 0 <= nx < GRID_SIZE and 0 <= ny < GRID_SIZE:
-                adj_cell_info = self.program.get_cell_info(nx, ny)
-                adj_objects = split_objects(adj_cell_info)
-                
-                # Add implications for percepts
-                if 'B' in objects:
-                    # If Breeze, then at least one adjacent cell contains a Pit
-                    self.kb.add_clause(Or(self.kb.propositions[(nx, ny, 'P')]))
-                if 'S' in objects:
-                    # If Stench, then at least one adjacent cell contains a Wumpus
-                    self.kb.add_clause(Or(self.kb.propositions[(nx, ny, 'W')]))
-                if 'W_H' in objects:
-                    # If Whiff, then at least one adjacent cell contains Poisonous Gas
-                    self.kb.add_clause(Or(self.kb.propositions[(nx, ny, 'P_G')]))
-                if 'G_L' in objects:
-                    # If Glow, then at least one adjacent cell contains Health Potion
-                    self.kb.add_clause(Or(self.kb.propositions[(nx, ny, 'H_P')]))
+        surr = {"B": "P", "S": "W", "W_H": "P_G", "G_L": "H_P"}
+        for percept in surr:
+            if not percept in objects:
+                continue
+
+            literals = []
+            for _, (dx, dy) in directions.items():
+                nx, ny = self.x + dx, self.y + dy
+                if 0 <= nx < GRID_SIZE and 0 <= ny < GRID_SIZE:
+                    literals.append(self.kb.propositions[(nx, ny, surr[percept])])
+
+            self.kb.add_clause_list(literals)
 
         # Infer new knowledge
         # self.kb.infer()
@@ -80,15 +72,20 @@ class Agent:
         self.actions.append(action_str)
         self.game_points += SCORE_ACTION
 
+        self.update_knowledge_base(self.x, self.y)
+
         # Check for Gold and Healing Potions
         cell_info = self.get_current_info()
         objects = split_objects(cell_info)
-        if 'G' in objects:
+
+        self.known[self.x][self.y].extend(objects)
+
+        if "G" in objects:
             return "gold"
-        elif 'H_P' in cell_info:
+        elif "H_P" in cell_info:
             return "healing potion"
         return ""
-    
+
     def turn_left(self):
         directions = ["up", "left", "down", "right"]
         self.direction = directions[(directions.index(self.direction) + 1) % 4]
@@ -106,15 +103,15 @@ class Agent:
     def grab(self):
         cell_info = self.get_current_info()
         objects = split_objects(cell_info)
-        if 'G' in objects:
+        if "G" in objects:
             self.gold_collected = True
-            self.program.set_cell_info(self.x, self.y, cell_info.replace('G', ''))
+            self.program.set_cell_info(self.x, self.y, cell_info.replace("G", ""))
             action_str = f"({self.y + 1},{GRID_SIZE - self.x}): grab"
             self.actions.append(action_str)
             return "gold"
-        elif 'H_P' in cell_info:
+        elif "H_P" in cell_info:
             self.healing_potions += 1
-            self.program.set_cell_info(self.x, self.y, cell_info.replace('H_P', ''))
+            self.program.set_cell_info(self.x, self.y, cell_info.replace("H_P", ""))
             action_str = f"({self.y + 1},{GRID_SIZE - self.x}): grab"
             self.program.update_map_after_grab(self.x, self.y)
             self.actions.append(action_str)
@@ -138,7 +135,7 @@ class Agent:
         if 0 <= nx < GRID_SIZE and 0 <= ny < GRID_SIZE:
             cell_info = self.program.get_cell_info(nx, ny)
             objects = split_objects(cell_info)
-            if 'W' in objects:
+            if "W" in objects:
                 self.program.update_map_after_wumpus_death(nx, ny)
                 action_str = f"({ny + 1},{GRID_SIZE - nx}): shoot"
                 self.actions.append(action_str)
@@ -166,19 +163,55 @@ class Agent:
     def check_cell(self):
         cell_info = self.get_current_info()
         objects = split_objects(cell_info)
-        print (objects)
-        if 'W' in objects:
+        print(objects)
+        if "W" in objects:
             return "wumpus"
-        elif 'P' in objects:
+        elif "P" in objects:
             return "pit"
-        elif 'P_G' in objects:
+        elif "P_G" in objects:
             self.health -= HEALTH_REDUCTION
             return "poisonous gas"
         return ""
+
+    def expand(self):
+        movs = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+        entities = ["B", "P", "S", "W", "W_H", "P_G", "G_L", "H_P", "G"]
+        front = []
+        while not self.frontier:
+            x, y = self.frontier.pop()
+
+            reached = []
+            for mov in movs:
+                nx, ny = x + mov[0], y + mov[1]
+                if 0 <= nx < GRID_SIZE and 0 <= ny < GRID_SIZE and not self.known[nx][ny]:
+                    for entity in entities:
+                        result = self.kb.check_consistency(self.kb.propositions[(nx, ny, entity)])
+                        if result == True:
+                            self.known[nx][ny].append(entity)
+                            self.kb.add_proposition(nx, ny, entity, True)
+                            reached.append((nx, ny))
+                            if entity == "G":
+                                print(nx, ny)
+                                return nx, ny
+                            break
+
+                    if all(self.kb.check_consistency(Not(self.kb.propositions[(nx, ny, entity)])) == True for entity in entities):
+                        for entity in entities:
+                            self.kb.add_proposition(nx, ny, entity, False)
+                        self.known[nx][ny].append("-")
+                        reached.append((nx, ny))
+            if reached:
+                self.frontier.extend(reached)
+            else:
+                front.append(x, y)
+        front.reverse()
+        self.frontier.extendleft(front)
+        self.kb.display_knowledge()
+        print(self.known)
+        print(self.program.map)
 
     def save_result(self):
         with open("result1.txt", "w") as f:
             for action in self.actions:
                 f.write(f"{action}\n")
             f.write(f"Game points: {self.game_points}\n")
-

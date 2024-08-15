@@ -1,9 +1,11 @@
 import tkinter as tk
 from tkinter import messagebox
 from define import *
+from agent import *
+
 
 class WumpusWorldGUI:
-    def __init__(self, master, program, agent):
+    def __init__(self, master: tk.Tk, program, agent: Agent):
         self.master = master
         self.master.title("Wumpus World")
         self.canvas = tk.Canvas(master, width=GRID_SIZE * CELL_SIZE, height=GRID_SIZE * CELL_SIZE)
@@ -44,14 +46,12 @@ class WumpusWorldGUI:
         self.master.bind("<Left>", self.on_turn_left)
         self.master.bind("<Right>", self.on_turn_right)
         self.master.bind("<Return>", self.on_move_forward)
-        
+
         self.display_usage_instructions()
-        
+        self.master.after(1000, self.nextStep)
+
     def display_usage_instructions(self):
-        instructions = (
-            "Arrow Keys: Turn Left/Right\n"
-            "Enter: Move Forward\n"
-        )
+        instructions = "Arrow Keys: Turn Left/Right\n" "Enter: Move Forward\n"
         self.message_label.config(text=instructions)
 
     def draw_grid(self):
@@ -92,25 +92,20 @@ class WumpusWorldGUI:
         self.clear_percepts()
         cell_info = self.agent.get_current_info()
         x, y = self.agent.x, self.agent.y
-        if 'S' in cell_info:
-            self.percept_text_ids['S'] = self.canvas.create_text(y * CELL_SIZE + CELL_SIZE / 4, x * CELL_SIZE + CELL_SIZE / 4,
-                                                                 text='S', fill="red", font=("Arial", 8))
-        if 'B' in cell_info:
-            self.percept_text_ids['B'] = self.canvas.create_text(y * CELL_SIZE + 3 * CELL_SIZE / 4, x * CELL_SIZE + CELL_SIZE / 4,
-                                                                 text='B', fill="blue", font=("Arial", 8))
-        if 'W_H' in cell_info:
-            self.percept_text_ids['W_H'] = self.canvas.create_text(y * CELL_SIZE + CELL_SIZE / 4, x * CELL_SIZE + 3 * CELL_SIZE / 4,
-                                                                 text='W_H', fill="gray", font=("Arial", 8))
-        if 'G_L' in cell_info:
-            self.percept_text_ids['G_L'] = self.canvas.create_text(y * CELL_SIZE + 3 * CELL_SIZE / 4, x * CELL_SIZE + 3 * CELL_SIZE / 4,
-                                                                   text='G_L', fill="red", font=("Arial", 8))
+        if "S" in cell_info:
+            self.percept_text_ids["S"] = self.canvas.create_text(y * CELL_SIZE + CELL_SIZE / 4, x * CELL_SIZE + CELL_SIZE / 4, text="S", fill="red", font=("Arial", 8))
+        if "B" in cell_info:
+            self.percept_text_ids["B"] = self.canvas.create_text(y * CELL_SIZE + 3 * CELL_SIZE / 4, x * CELL_SIZE + CELL_SIZE / 4, text="B", fill="blue", font=("Arial", 8))
+        if "W_H" in cell_info:
+            self.percept_text_ids["W_H"] = self.canvas.create_text(y * CELL_SIZE + CELL_SIZE / 4, x * CELL_SIZE + 3 * CELL_SIZE / 4, text="W_H", fill="gray", font=("Arial", 8))
+        if "G_L" in cell_info:
+            self.percept_text_ids["G_L"] = self.canvas.create_text(y * CELL_SIZE + 3 * CELL_SIZE / 4, x * CELL_SIZE + 3 * CELL_SIZE / 4, text="G_L", fill="red", font=("Arial", 8))
 
         self.health_label.config(text=f"Health: {self.agent.health}")
         self.arrow_label.config(text=f"Arrows: {self.agent.arrows}")
         self.gold_label.config(text=f"Gold: {'Collected' if self.agent.gold_collected else 'Not Collected'}")
         self.points_label.config(text=f"Score: {self.agent.game_points}")
         self.potions_label.config(text=f"Healing Potions: {self.agent.healing_potions}")
-        
 
     def display_message(self, message):
         self.message_label.config(text=message)
@@ -132,7 +127,6 @@ class WumpusWorldGUI:
         self.check_agent_status()
         self.update_grid()
         self.update_agent_position()
-
 
     def on_grab(self):
         result = self.agent.grab()
@@ -192,3 +186,11 @@ class WumpusWorldGUI:
                 messagebox.showinfo("Game Over", "You have been killed by the poisonous gas!")
                 self.agent.save_result()
                 self.master.quit()
+
+    def nextStep(self):
+        if x := self.agent.expand():
+            self.display_message(f"Golad founde ate {x}")
+            self.master.destroy()
+            return
+
+        self.master.after(10000, self.nextStep)
