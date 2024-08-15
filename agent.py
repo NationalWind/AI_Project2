@@ -17,8 +17,6 @@ class Agent:
         self.direction = "up"  # Initial direction
         self.healing_potions = 0  # Track healing potions
         self.kb = KnowledgeBase(GRID_SIZE)
-        self.frontier = deque([(9, 0)])
-        self.known = [[[]] * 10 for _ in range(10)]
 
     def update_knowledge_base(self, x, y):
         cell_info = self.get_current_info()
@@ -77,8 +75,6 @@ class Agent:
         # Check for Gold and Healing Potions
         cell_info = self.get_current_info()
         objects = split_objects(cell_info)
-
-        self.known[self.x][self.y].extend(objects)
 
         if "G" in objects:
             return "gold"
@@ -163,7 +159,6 @@ class Agent:
     def check_cell(self):
         cell_info = self.get_current_info()
         objects = split_objects(cell_info)
-        print(objects)
         if "W" in objects:
             return "wumpus"
         elif "P" in objects:
@@ -172,43 +167,6 @@ class Agent:
             self.health -= HEALTH_REDUCTION
             return "poisonous gas"
         return ""
-
-    def expand(self):
-        movs = [(-1, 0), (1, 0), (0, -1), (0, 1)]
-        entities = ["B", "P", "S", "W", "W_H", "P_G", "G_L", "H_P", "G"]
-        front = []
-        while not self.frontier:
-            x, y = self.frontier.pop()
-
-            reached = []
-            for mov in movs:
-                nx, ny = x + mov[0], y + mov[1]
-                if 0 <= nx < GRID_SIZE and 0 <= ny < GRID_SIZE and not self.known[nx][ny]:
-                    for entity in entities:
-                        result = self.kb.check_consistency(self.kb.propositions[(nx, ny, entity)])
-                        if result == True:
-                            self.known[nx][ny].append(entity)
-                            self.kb.add_proposition(nx, ny, entity, True)
-                            reached.append((nx, ny))
-                            if entity == "G":
-                                print(nx, ny)
-                                return nx, ny
-                            break
-
-                    if all(self.kb.check_consistency(Not(self.kb.propositions[(nx, ny, entity)])) == True for entity in entities):
-                        for entity in entities:
-                            self.kb.add_proposition(nx, ny, entity, False)
-                        self.known[nx][ny].append("-")
-                        reached.append((nx, ny))
-            if reached:
-                self.frontier.extend(reached)
-            else:
-                front.append(x, y)
-        front.reverse()
-        self.frontier.extendleft(front)
-        self.kb.display_knowledge()
-        print(self.known)
-        print(self.program.map)
 
     def save_result(self):
         with open("result1.txt", "w") as f:

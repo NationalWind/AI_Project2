@@ -1,6 +1,6 @@
-from sympy import symbols, Or, And, Not, Implies
-from sympy.logic.boolalg import to_cnf, simplify_logic
 from define import *
+from sympy import symbols, Or, And, Not, Implies, Symbol
+from sympy.logic.boolalg import to_cnf, simplify_logic
 
 
 # Define propositions
@@ -60,6 +60,9 @@ class KnowledgeBase:
         # Placeholder for inference logic
         # Here, you might want to implement a more sophisticated inference mechanism
         pass
+
+    def isKnown(self, pos: tuple[int, int]):
+        return 9 == sum(1 for clause in self.clauses if isinstance(clause, Symbol) and str(clause).endswith(f"{pos[0]}_{pos[1]}"))
 
     def display_knowledge(self):
         # Display the CNF of the knowledge base

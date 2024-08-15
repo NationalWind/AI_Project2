@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 from define import *
 from agent import *
+from bfs import *
 
 
 class WumpusWorldGUI:
@@ -46,6 +47,8 @@ class WumpusWorldGUI:
         self.master.bind("<Left>", self.on_turn_left)
         self.master.bind("<Right>", self.on_turn_right)
         self.master.bind("<Return>", self.on_move_forward)
+
+        self.path = []
 
         self.display_usage_instructions()
         self.master.after(1000, self.nextStep)
@@ -128,6 +131,26 @@ class WumpusWorldGUI:
         self.update_grid()
         self.update_agent_position()
 
+    def move(self, direction):
+        idx = {"up": 0, "right": 1, "down": 2, "left": 3}
+        diff = idx[self.direction] - idx[direction]
+        if diff < 0:
+            if -diff < 2:
+                for _ in range(-diff):
+                    self.on_turn_right()
+            else:
+                for _ in range(4 + diff):
+                    self.on_turn_left()
+            self.on_move_forward()
+        else:
+            if diff < 2:
+                for _ in range(diff):
+                    self.on_turn_left()
+            else:
+                for _ in range(4 - diff):
+                    self.on_turn_right()
+            self.on_move_forward()
+
     def on_grab(self):
         result = self.agent.grab()
         if result == "gold":
@@ -187,10 +210,11 @@ class WumpusWorldGUI:
                 self.agent.save_result()
                 self.master.quit()
 
+
     def nextStep(self):
-        if x := self.agent.expand():
-            self.display_message(f"Golad founde ate {x}")
-            self.master.destroy()
-            return
+        result = BFS(self.agent)
+        
+
+        self.kb.display_knowledge()
 
         self.master.after(10000, self.nextStep)
