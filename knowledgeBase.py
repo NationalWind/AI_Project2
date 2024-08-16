@@ -17,6 +17,7 @@ def define_propositions():
             propositions[(x, y, "S")] = symbols(f"S_{x}_{y}")
             propositions[(x, y, "W_H")] = symbols(f"W_H_{x}_{y}")
             propositions[(x, y, "G_L")] = symbols(f"G_L_{x}_{y}")
+
     return propositions
 
 
@@ -24,15 +25,15 @@ class KnowledgeBase:
     def __init__(self, size):
         self.size = size
         self.propositions = define_propositions()
-        self.clauses = []  # List of CNF clauses
+        self.clauses = True
 
     def add_clause(self, *literals):
         # Adds a CNF clause to the knowledge base
-        self.clauses.append(Or(*literals))
+        self.clauses = And(self.clauses, (Or(*literals)))
 
     def add_clause_list(self, literals):
         # Adds a CNF clause to the knowledge base
-        self.clauses.append(Or(*literals))
+        self.clauses = And(self.clauses, (Or(*literals)))
 
     def add_proposition(self, x, y, prop, value):
         proposition = self.propositions[(x, y, prop)]
@@ -49,9 +50,9 @@ class KnowledgeBase:
     def check_consistency(self, proposition):
         # Check if adding the proposition leads to inconsistency
         proposition = to_cnf(proposition, True)
-        full_cnf = And(*self.clauses)
-        test = simplify_logic(And(full_cnf, Not(proposition)))
+        test = simplify_logic(And(self.clauses, Not(proposition)))
         if test == False:
+            self.add_clause(proposition)
             return True  # Contradiction
         else:
             return "Unknown"  # Ambiguous
@@ -62,11 +63,17 @@ class KnowledgeBase:
         pass
 
     def isKnown(self, pos: tuple[int, int]):
-        return 9 == sum(1 for clause in self.clauses if isinstance(clause, Symbol) and str(clause).endswith(f"{pos[0]}_{pos[1]}"))
+        entities = ["W", "P", "G", "P_G", "H_P", "B", "S", "W_H", "G_L"]
+        for entity in entities:
+            check_pos = self.check_consistency(self.propositions[(*pos, entity)])
+            check_neg = self.check_consistency(Not(self.propositions[(*pos, entity)]))
+            if check_pos == "Unknown" and check_neg == "Unknown":
+                return False
+        return True
 
     def display_knowledge(self):
         # Display the CNF of the knowledge base
-        print(And(*self.clauses))
+        print(self.clauses)
 
 
 kb = KnowledgeBase(GRID_SIZE)

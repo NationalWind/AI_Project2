@@ -8,6 +8,7 @@ from WumpusWorldGUI import WumpusWorldGUI
 if __name__ == "__main__":
     root = tk.Tk()
     program = Program()
+    print(program.map)
     agent = Agent(program)
     agent.kb.display_knowledge()
     agent.kb.display_knowledge()

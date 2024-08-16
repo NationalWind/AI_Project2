@@ -5,6 +5,7 @@ from define import *
 from collections import deque
 
 
+
 class Agent:
     def __init__(self, program):
         self.program = program
@@ -17,8 +18,10 @@ class Agent:
         self.direction = "up"  # Initial direction
         self.healing_potions = 0  # Track healing potions
         self.kb = KnowledgeBase(GRID_SIZE)
+        self.visited = [[False] * 10 for _ in range(10)]
 
     def update_knowledge_base(self, x, y):
+        self.visited[x][y] = True
         cell_info = self.get_current_info()
         objects = split_objects(cell_info)
 
@@ -80,6 +83,8 @@ class Agent:
             return "gold"
         elif "H_P" in cell_info:
             return "healing potion"
+        elif "P_S" in cell_info:
+            return "poisonous gas"
         return ""
 
     def turn_left(self):

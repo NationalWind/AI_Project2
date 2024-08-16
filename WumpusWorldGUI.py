@@ -3,6 +3,7 @@ from tkinter import messagebox
 from define import *
 from agent import *
 from bfs import *
+from collections import deque
 
 
 class WumpusWorldGUI:
@@ -49,6 +50,10 @@ class WumpusWorldGUI:
         self.master.bind("<Return>", self.on_move_forward)
 
         self.path = []
+        self.isReturning = False
+        self.agent.update_knowledge_base(9, 0)
+
+        self.nextStepQueue = deque([])
 
         self.display_usage_instructions()
         self.master.after(1000, self.nextStep)
@@ -113,43 +118,69 @@ class WumpusWorldGUI:
     def display_message(self, message):
         self.message_label.config(text=message)
 
-    def on_turn_left(self, event):
+    def on_turn_left(self, event=None):
         self.agent.turn_left()
         self.update_agent_position()
 
-    def on_turn_right(self, event):
+    def on_turn_right(self, event=None):
         self.agent.turn_right()
         self.update_agent_position()
 
-    def on_move_forward(self, event):
+    def on_move_forward(self, event=None):
         result = self.agent.move_forward()
         if result == "gold":
             self.display_message("You have entered a cell with Gold!")
+            self.nextStepQueue.append(lambda: self.on_grab())
+
         elif result == "healing potion":
             self.display_message("You have entered a cell with Healing Potion!")
+            self.nextStepQueue.append(lambda: self.on_grab())
+
+        elif result == "poisonous gas":
+            if self.agent.healing_potions > 0:
+                self.nextStepQueue.append(lambda: self.on_heal())
+
         self.check_agent_status()
+
         self.update_grid()
         self.update_agent_position()
 
+        if (self.agent.x, self.agent.y) == (9, 0) and self.agent.gold_collected:
+            self.master.after(2000, lambda: self.master.destroy())
+
     def move(self, direction):
         idx = {"up": 0, "right": 1, "down": 2, "left": 3}
-        diff = idx[self.direction] - idx[direction]
+
+        # delay?
+        diff = idx[self.agent.direction] - idx[direction]
         if diff < 0:
             if -diff < 2:
                 for _ in range(-diff):
-                    self.on_turn_right()
+                    self.nextStepQueue.append(lambda: self.on_turn_right())
+
             else:
                 for _ in range(4 + diff):
-                    self.on_turn_left()
-            self.on_move_forward()
+                    self.nextStepQueue.append(lambda: self.on_turn_left())
         else:
             if diff < 2:
                 for _ in range(diff):
-                    self.on_turn_left()
+                    self.nextStepQueue.append(lambda: self.on_turn_left())
             else:
                 for _ in range(4 - diff):
-                    self.on_turn_right()
-            self.on_move_forward()
+                    self.nextStepQueue.append(lambda: self.on_turn_right())
+
+        nx, ny = self.agent.x, self.agent.y
+        if direction == "up":
+            nx -= 1
+        elif direction == "down":
+            nx += 1
+        elif direction == "left":
+            ny -= 1
+        elif direction == "right":
+            ny += 1
+        if not self.agent.visited[nx][ny] and not isinstance(self.agent.kb.clauses, bool) and self.agent.kb.clauses.has(self.agent.kb.propositions[(nx, ny, "W")]):
+            self.nextStepQueue.append(lambda: self.on_shoot())
+        self.nextStepQueue.append(lambda: self.on_move_forward())
 
     def on_grab(self):
         result = self.agent.grab()
@@ -164,6 +195,7 @@ class WumpusWorldGUI:
 
     def on_shoot(self):
         result = self.agent.shoot()
+        print("shoot")
         if result == "wumpus killed":
             self.display_message("Scream!!")
         elif result == "missed":
@@ -210,11 +242,27 @@ class WumpusWorldGUI:
                 self.agent.save_result()
                 self.master.quit()
 
-
     def nextStep(self):
-        result = BFS(self.agent)
-        
+        if not self.agent.gold_collected or (self.agent.x, self.agent.y) != (9, 0):
+            if self.nextStepQueue:
+                self.nextStepQueue.popleft()()
+            else:
+                if self.agent.gold_collected and not self.isReturning:
+                    result = BFS(self.agent)
+                    self.path = trace(result)
+                    self.path.pop()
+                    self.isReturning = True
 
-        self.kb.display_knowledge()
+                if not self.path:
+                    result = BFS(self.agent)
+                    self.path = trace(result)
+                    self.path.pop()
 
-        self.master.after(10000, self.nextStep)
+                print(self.path[-1])
+
+                self.move(self.path[-1])
+                self.path.pop()
+
+            # self.agent.kb.display_knowledge()
+
+        self.master.after(2000, self.nextStep)
