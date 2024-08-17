@@ -176,7 +176,7 @@ class WumpusWorldGUI:
             ny -= 1
         elif direction == "right":
             ny += 1
-        if not self.agent.visited[nx][ny] and not isinstance(self.agent.kb.clauses, bool) and self.agent.kb.clauses.has(self.agent.kb.propositions[(nx, ny, "W")]):
+        if not self.agent.visited[nx][ny] and not isinstance(self.agent.kb.clauses, bool) and self.agent.kb.clauses.has(self.agent.kb.propositions[(nx, ny, "W")]) and self.agent.kb.check_consistency(Not(self.agent.kb.propositions[(nx, ny, "W")])) == "Unknown":
             self.nextStepQueue.append(self.lacdas[5])
         self.nextStepQueue.append(self.lacdas[6])
 
@@ -273,13 +273,9 @@ class WumpusWorldGUI:
                         self.path = trace(result)
                         self.path.pop()
 
-                if len(self.agent.last_steps) < 2:
-                    self.agent.last_steps.append(self.path[-1])
-                else:
-                    self.agent.last_steps.remove(self.agent.last_steps[0])
-                    self.agent.last_steps.append(self.path[-1])
+                self.agent.last_positions.append(self.path[-1].state)
 
-                self.move(self.path[-1])
+                self.move(self.path[-1].action)
                 self.path.pop()
 
             # self.agent.kb.display_knowledge()

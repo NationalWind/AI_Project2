@@ -3,10 +3,11 @@ from tkinter import messagebox
 from knowledgeBase import *
 from define import *
 from collections import deque
+from program import Program
 
 
 class Agent:
-    def __init__(self, program):
+    def __init__(self, program: Program):
         self.program = program
         self.x, self.y = GRID_SIZE - 1, 0  # Start position (1,1) in 1-indexed, (9,0) in 0-indexed
         self.actions = []
@@ -17,7 +18,7 @@ class Agent:
         self.direction = "up"  # Initial direction
         self.healing_potions = 0  # Track healing potions
         self.kb = KnowledgeBase(GRID_SIZE)
-        self.last_steps = []
+        self.last_positions = []
         self.isReturning = False
         self.visited = [[False] * 10 for _ in range(10)]
 

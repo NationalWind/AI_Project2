@@ -12,11 +12,11 @@ class Program:
         base_map = [
             ["-", "-", "WH_PWW", "-", "P", "-", "-", "P_G", "-", "G"],
             ["-", "-", "-", "-", "-", "-", "-", "-", "-", "-"],
-            ["-", "-", "-", "-", "H_P", "-", "-", "-", "-", "-"],
+            ["-", "P", "-", "G", "H_P", "-", "-", "-", "-", "-"],
             ["-", "GH_P", "WH_P", "-", "G", "-", "P", "-", "-", "-"],
             ["-", "-", "-", "-", "P_G", "-", "-", "-", "-", "-"],
             ["H_P", "-", "-", "-", "-", "W", "-", "-", "H_P", "-"],
-            ["P", "-", "P", "-", "W", "WP_GPH_P", "-", "-", "-", "-"],
+            ["P", "-", "-", "-", "W", "WP_GH_P", "-", "-", "-", "-"],
             ["-", "GH_P", "-", "-", "G", "-", "-", "-", "-", "-"],
             ["-", "-", "W", "-", "-", "-", "-", "W", "G", "-"],
             ["A", "-", "-", "P_G", "_", "-", "-", "-", "-", "-"],
@@ -95,8 +95,14 @@ class Program:
                 for dy in [-1, 0, 1]:
                     nx, ny = x + dx, y + dy
                     if 0 <= nx < GRID_SIZE and 0 <= ny < GRID_SIZE:
-                        cell_info = self.get_cell_info(nx, ny)
-                        self.set_cell_info(nx, ny, cell_info.replace("S", ""))
+                        for bx in [-1, 0, 1]:
+                            for by in [-1, 0, 1]:
+                                sx, sy = nx + bx, ny + by
+                                if 0 <= sx < GRID_SIZE and 0 <= sy < GRID_SIZE:
+                                    cell_info = self.get_cell_info(sx, sy)
+                                    objects = split_objects(cell_info)
+                                    if "W" not in objects:
+                                        self.set_cell_info(nx, ny, cell_info.replace("S", ""))
 
     def update_map_after_grab(self, x, y):
         # Remove glow from the Healing Potions cell
