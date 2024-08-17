@@ -5,5 +5,38 @@
 (1,2): move forward
 (1,2): turn left
 (2,2): move forward
+(2,2): turn right
+(2,1): shoot
+(2,1): move forward
+(2,1): turn left
+(3,1): move forward
+(3,1): turn left
+(3,2): shoot
+(3,2): shoot
 (3,2): move forward
-Game points: -10080
+(3,3): move forward
+(3,3): turn left
+(3,3): turn left
+(3,2): move forward
+(3,2): turn left
+(4,2): move forward
+(4,2): turn right
+(4,1): shoot
+(4,1): move forward
+(4,1): turn left
+(5,1): move forward
+(5,1): turn left
+(5,1): turn left
+(4,1): move forward
+(4,1): turn right
+(4,2): move forward
+(4,2): turn left
+(4,2): turn left
+(4,1): move forward
+(4,1): turn right
+(4,1): turn right
+(4,2): move forward
+(4,2): turn left
+(4,2): turn left
+(4,1): move forward
+Game points: -770

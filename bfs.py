@@ -23,11 +23,11 @@ def BFS(agent: Agent):
     result: None | Node = None
     while frontier:
         node = frontier.popleft()
-        if not agent.gold_collected and agent.kb.check_consistency(agent.kb.propositions[(node.state[0], node.state[1], "P_G")]) is True:
+        if not agent.isReturning and not agent.kb.cnt_known == 100 and agent.kb.check_consistency(agent.kb.propositions[(node.state[0], node.state[1], "P_G")]) is True:
             continue
         for child in expand(node, agent):
             sx, sy = child.state
-            if agent.gold_collected:
+            if agent.isReturning or agent.kb.cnt_known == 100:
                 if (sx, sy) == (9, 0):
                     return child
             else:
@@ -56,13 +56,23 @@ def BFS(agent: Agent):
             maybe_poison_negative = None
             maybe_wumpus = None
             maybe_pit = None
-            if not isinstance(agent.kb.clauses, bool) and agent.kb.clauses.has(agent.kb.propositions[(sx, sy, "P")]):
+            if not isinstance(agent.kb.clauses, bool) and (agent.kb.clauses.has(agent.kb.propositions[(sx, sy, "P")])):
                 if agent.visited[sx][sy]:
-                    known = child
+                    if known is None:
+                        if agent.health <= 50:
+                            if not agent.kb.clauses.has(agent.kb.propositions[(sx, sy, "P_G")]):
+                                known = child
+                        else:
+                            known = child
+                    else:
+                        if not isinstance(agent.kb.clauses, bool) and agent.kb.check_consistency(Not(agent.kb.propositions[(sx, sy, "P_G")])) == True:
+                            known = child
+                        elif child.action != agent.last_steps[0]:
+                            known = child
                 continue  # ?
                 maybe_pit = child  # last priority
             if not isinstance(agent.kb.clauses, bool) and agent.kb.clauses.has(agent.kb.propositions[(sx, sy, "P_G")]):  # and agent.kb.check_consistency(agent.kb.propositions[(sx, sy, "P_G")] == "Unknown")
-                if agent.healing_potions > 0 or agent.health >= 50:
+                if agent.healing_potions > 0 or agent.health > 50:
                     maybe_poison_positive = child
                 else:
                     maybe_poison_negative = child
@@ -81,6 +91,8 @@ def BFS(agent: Agent):
                 next_node = child
             if not agent.visited[sx][sy] and maybe_poison_positive:
                 next_node = child
+            if not maybe_poison_negative and not maybe_pit:  # still unsure thou,,..
+                return child
 
         if next_node is None:
             return known
@@ -99,7 +111,7 @@ def expand(node, agent: Agent, for_start=False) -> list[Node]:
             0 <= nx < 10
             and 0 <= ny < 10
             and (
-                (agent.gold_collected and agent.visited[nx][ny])
+                ((agent.kb.cnt_known == 100 or agent.isReturning) and agent.visited[nx][ny])
                 or (agent.kb.check_consistency(Not(agent.kb.propositions[(nx, ny, "P")])) == True and (agent.kb.check_consistency(Not(agent.kb.propositions[(nx, ny, "W")])) is True or agent.kb.check_consistency(Not(agent.kb.propositions[(nx, ny, "P_G")])) is True))
                 or (for_start and agent.kb.check_consistency(agent.kb.propositions[(nx, ny, "P")]) == "Unknown" and agent.kb.check_consistency(agent.kb.propositions[(nx, ny, "W")]) == "Unknown" and agent.kb.check_consistency(agent.kb.propositions[(nx, ny, "P_G")]) == "Unknown")
             )

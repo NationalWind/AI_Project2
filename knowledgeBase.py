@@ -26,6 +26,8 @@ class KnowledgeBase:
         self.size = size
         self.propositions = define_propositions()
         self.clauses = True
+        self.known = [[False] * 10 for _ in range(10)]
+        self.cnt_known = 0
 
     def add_clause(self, *literals):
         # Adds a CNF clause to the knowledge base
@@ -63,12 +65,16 @@ class KnowledgeBase:
         pass
 
     def isKnown(self, pos: tuple[int, int]):
+        if self.known[pos[0]][pos[1]]:
+            return True
+
         entities = ["W", "P", "G", "P_G", "H_P", "B", "S", "W_H", "G_L"]
         for entity in entities:
             check_pos = self.check_consistency(self.propositions[(*pos, entity)])
             check_neg = self.check_consistency(Not(self.propositions[(*pos, entity)]))
             if check_pos == "Unknown" and check_neg == "Unknown":
                 return False
+        self.cnt_known += 1
         return True
 
     def display_knowledge(self):

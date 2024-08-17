@@ -10,16 +10,16 @@ class Program:
 
     def generate_map(self):
         base_map = [
-            ["-", "-", "WH_PWW", "-", "P", "-", "-", "P_G", "-", "-"],
+            ["-", "-", "WH_PWW", "-", "P", "-", "-", "P_G", "-", "G"],
             ["-", "-", "-", "-", "-", "-", "-", "-", "-", "-"],
             ["-", "-", "-", "-", "H_P", "-", "-", "-", "-", "-"],
-            ["-", "GH_P", "WH_P", "-", "-", "-", "P", "-", "-", "-"],
+            ["-", "GH_P", "WH_P", "-", "G", "-", "P", "-", "-", "-"],
             ["-", "-", "-", "-", "P_G", "-", "-", "-", "-", "-"],
             ["H_P", "-", "-", "-", "-", "W", "-", "-", "H_P", "-"],
-            ["P", "-", "P", "-", "P", "WP_GPH_P", "-", "-", "-", "-"],
-            ["-", "GH_P", "-", "-", "-", "-", "-", "-", "-", "-"],
-            ["-", "-", "W", "-", "-", "-", "-", "W", "-", "-"],
-            ["A", "-", "-", "P_G", "G", "P", "-", "-", "-", "-"],
+            ["P", "-", "P", "-", "W", "WP_GPH_P", "-", "-", "-", "-"],
+            ["-", "GH_P", "-", "-", "G", "-", "-", "-", "-", "-"],
+            ["-", "-", "W", "-", "-", "-", "-", "W", "G", "-"],
+            ["A", "-", "-", "P_G", "_", "-", "-", "-", "-", "-"],
         ]
 
         percept_map = [["" for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)]
@@ -34,25 +34,25 @@ class Program:
                 cell_objects = split_objects(base_map[i][j])
                 for obj in cell_objects:
                     if obj == "W":
-                        add_percept(i, j, "S")  # Add Stench to the Wumpus cell itself
+                        # add_percept(i, j, "S")  # Add Stench to the Wumpus cell itself
                         add_percept(i - 1, j, "S")  # Stench around Wumpus
                         add_percept(i + 1, j, "S")
                         add_percept(i, j - 1, "S")
                         add_percept(i, j + 1, "S")
                     elif obj == "P":
-                        add_percept(i, j, "B")  # Add Breeze to the Pit cell itself
+                        # add_percept(i, j, "B")  # Add Breeze to the Pit cell itself
                         add_percept(i - 1, j, "B")  # Breeze around Pit
                         add_percept(i + 1, j, "B")
                         add_percept(i, j - 1, "B")
                         add_percept(i, j + 1, "B")
                     elif obj == "P_G":
-                        add_percept(i, j, "W_H")  # Add Whiff to the Poisonous Gas cell itself
+                        # add_percept(i, j, "W_H")  # Add Whiff to the Poisonous Gas cell itself
                         add_percept(i - 1, j, "W_H")  # Whiff around Poisonous Gas
                         add_percept(i + 1, j, "W_H")
                         add_percept(i, j - 1, "W_H")
                         add_percept(i, j + 1, "W_H")
                     elif obj == "H_P":
-                        add_percept(i, j, "G_L")  # Add Glow to the Healing Potions cell itself
+                        # add_percept(i, j, "G_L")  # Add Glow to the Healing Potions cell itself
                         add_percept(i - 1, j, "G_L")  # Glow around Healing Potions
                         add_percept(i + 1, j, "G_L")
                         add_percept(i, j - 1, "G_L")

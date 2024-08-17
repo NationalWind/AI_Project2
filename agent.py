@@ -5,7 +5,6 @@ from define import *
 from collections import deque
 
 
-
 class Agent:
     def __init__(self, program):
         self.program = program
@@ -18,6 +17,8 @@ class Agent:
         self.direction = "up"  # Initial direction
         self.healing_potions = 0  # Track healing potions
         self.kb = KnowledgeBase(GRID_SIZE)
+        self.last_steps = []
+        self.isReturning = False
         self.visited = [[False] * 10 for _ in range(10)]
 
     def update_knowledge_base(self, x, y):

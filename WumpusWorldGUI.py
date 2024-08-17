@@ -50,13 +50,15 @@ class WumpusWorldGUI:
         self.master.bind("<Return>", self.on_move_forward)
 
         self.path = []
-        self.isReturning = False
+
         self.agent.update_knowledge_base(9, 0)
 
         self.nextStepQueue = deque([])
 
         self.display_usage_instructions()
         self.master.after(1000, self.nextStep)
+
+        self.lacdas = [lambda: self.on_grab(), lambda: self.on_heal(), lambda: self.master.destroy(), lambda: self.on_turn_right(), lambda: self.on_turn_left(), lambda: self.on_shoot(), lambda: self.on_move_forward()]
 
     def display_usage_instructions(self):
         instructions = "Arrow Keys: Turn Left/Right\n" "Enter: Move Forward\n"
@@ -130,23 +132,23 @@ class WumpusWorldGUI:
         result = self.agent.move_forward()
         if result == "gold":
             self.display_message("You have entered a cell with Gold!")
-            self.nextStepQueue.append(lambda: self.on_grab())
+            self.nextStepQueue.append(self.lacdas[0])
 
         elif result == "healing potion":
             self.display_message("You have entered a cell with Healing Potion!")
-            self.nextStepQueue.append(lambda: self.on_grab())
+            self.nextStepQueue.append(self.lacdas[0])
 
         elif result == "poisonous gas":
             if self.agent.healing_potions > 0:
-                self.nextStepQueue.append(lambda: self.on_heal())
+                self.nextStepQueue.append(self.lacdas[1])
 
         self.check_agent_status()
 
         self.update_grid()
         self.update_agent_position()
 
-        if (self.agent.x, self.agent.y) == (9, 0) and self.agent.gold_collected:
-            self.master.after(2000, lambda: self.master.destroy())
+        if (self.agent.x, self.agent.y) == (9, 0) and self.agent.isReturning == True:
+            self.master.after(2000, self.lacdas[2])
 
     def move(self, direction):
         idx = {"up": 0, "right": 1, "down": 2, "left": 3}
@@ -156,18 +158,18 @@ class WumpusWorldGUI:
         if diff < 0:
             if -diff < 2:
                 for _ in range(-diff):
-                    self.nextStepQueue.append(lambda: self.on_turn_right())
+                    self.nextStepQueue.append(self.lacdas[3])
 
             else:
                 for _ in range(4 + diff):
-                    self.nextStepQueue.append(lambda: self.on_turn_left())
+                    self.nextStepQueue.append(self.lacdas[4])
         else:
             if diff < 2:
                 for _ in range(diff):
-                    self.nextStepQueue.append(lambda: self.on_turn_left())
+                    self.nextStepQueue.append(self.lacdas[4])
             else:
                 for _ in range(4 - diff):
-                    self.nextStepQueue.append(lambda: self.on_turn_right())
+                    self.nextStepQueue.append(self.lacdas[3])
 
         nx, ny = self.agent.x, self.agent.y
         if direction == "up":
@@ -179,8 +181,8 @@ class WumpusWorldGUI:
         elif direction == "right":
             ny += 1
         if not self.agent.visited[nx][ny] and not isinstance(self.agent.kb.clauses, bool) and self.agent.kb.clauses.has(self.agent.kb.propositions[(nx, ny, "W")]):
-            self.nextStepQueue.append(lambda: self.on_shoot())
-        self.nextStepQueue.append(lambda: self.on_move_forward())
+            self.nextStepQueue.append(self.lacdas[5])
+        self.nextStepQueue.append(self.lacdas[6])
 
     def on_grab(self):
         result = self.agent.grab()
@@ -201,6 +203,7 @@ class WumpusWorldGUI:
         elif result == "missed":
             self.display_message("Missed the shot.")
         self.update_grid()
+        return result
 
     def on_climb(self):
         result = self.agent.climb()
@@ -243,26 +246,44 @@ class WumpusWorldGUI:
                 self.master.quit()
 
     def nextStep(self):
-        if not self.agent.gold_collected or (self.agent.x, self.agent.y) != (9, 0):
+        if not self.agent.isReturning or (self.agent.x, self.agent.y) != (9, 0):
             if self.nextStepQueue:
-                self.nextStepQueue.popleft()()
+                lacda = self.nextStepQueue.popleft()
+                if lacda == self.lacdas[5]:
+                    res = lacda()
+                    if res != "missed":
+                        self.nextStepQueue.appendleft(self.lacdas[5])
+                else:
+                    lacda()
+
             else:
-                if self.agent.gold_collected and not self.isReturning:
+                if self.agent.kb.cnt_known == 100 and not self.agent.isReturning:
                     result = BFS(self.agent)
                     self.path = trace(result)
                     self.path.pop()
-                    self.isReturning = True
+                    self.agent.isReturning = True
 
                 if not self.path:
                     result = BFS(self.agent)
                     self.path = trace(result)
-                    self.path.pop()
 
-                print(self.path[-1])
+                    if self.path:
+                        self.path.pop()
+                    else:
+                        self.agent.isReturning = True
+                        result = BFS(self.agent)
+                        self.path = trace(result)
+                        self.path.pop()
+
+                if len(self.agent.last_steps) < 2:
+                    self.agent.last_steps.append(self.path[-1])
+                else:
+                    self.agent.last_steps.remove(self.agent.last_steps[0])
+                    self.agent.last_steps.append(self.path[-1])
 
                 self.move(self.path[-1])
                 self.path.pop()
 
             # self.agent.kb.display_knowledge()
 
-        self.master.after(2000, self.nextStep)
+        self.master.after(200, self.nextStep)
