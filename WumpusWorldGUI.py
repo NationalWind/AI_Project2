@@ -255,11 +255,11 @@ class WumpusWorldGUI:
                     lacda()
 
             else:
-                if self.agent.kb.cnt_known == 100 and not self.agent.isReturning:
-                    result = BFS(self.agent)
-                    self.path = trace(result)
-                    self.path.pop()
-                    self.agent.isReturning = True
+                # if not self.agent.isReturning:  # self.agent.kb.cnt_known == 100
+                #     result = BFS(self.agent)
+                #     self.path = trace(result)
+                #     self.path.pop()
+                #     self.agent.isReturning = True
 
                 if not self.path:
                     result = BFS(self.agent)

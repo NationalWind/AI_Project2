@@ -64,18 +64,20 @@ class KnowledgeBase:
         # Here, you might want to implement a more sophisticated inference mechanism
         pass
 
-    def isKnown(self, pos: tuple[int, int]):
-        if self.known[pos[0]][pos[1]]:
-            return True
+    # def isKnown(self, pos: tuple[int, int]):
+    #     if self.known[pos[0]][pos[1]]:
+    #         return True
 
-        entities = ["W", "P", "G", "P_G", "H_P", "B", "S", "W_H", "G_L"]
-        for entity in entities:
-            check_pos = self.check_consistency(self.propositions[(*pos, entity)])
-            check_neg = self.check_consistency(Not(self.propositions[(*pos, entity)]))
-            if check_pos == "Unknown" and check_neg == "Unknown":
-                return False
-        self.cnt_known += 1
-        return True
+    #     entities = ["W", "P", "G", "P_G", "H_P", "B", "S", "W_H", "G_L"]
+    #     for entity in entities:
+    #         check_pos = self.check_consistency(self.propositions[(*pos, entity)])
+    #         check_neg = self.check_consistency(Not(self.propositions[(*pos, entity)]))
+    #         if check_pos == "Unknown" and check_neg == "Unknown":
+    #             return False
+
+    #     self.known[pos[0]][pos[1]] = True
+    #     self.cnt_known += 1
+    #     return True
 
     def display_knowledge(self):
         # Display the CNF of the knowledge base

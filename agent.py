@@ -21,9 +21,13 @@ class Agent:
         self.last_positions = []
         self.isReturning = False
         self.visited = [[False] * 10 for _ in range(10)]
+        self.cnt_visited = 0
 
     def update_knowledge_base(self, x, y):
-        self.visited[x][y] = True
+        if not self.visited[x][y]:
+            self.visited[x][y] = True
+            self.cnt_visited += 1
+
         cell_info = self.get_current_info()
         objects = split_objects(cell_info)
 
