@@ -84,8 +84,6 @@ class Agent:
             return "gold"
         elif "H_P" in cell_info:
             return "healing potion"
-        elif "P_S" in cell_info:
-            return "poisonous gas"
         return ""
 
     def turn_left(self):

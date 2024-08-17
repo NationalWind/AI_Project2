@@ -138,10 +138,6 @@ class WumpusWorldGUI:
             self.display_message("You have entered a cell with Healing Potion!")
             self.nextStepQueue.append(self.lacdas[0])
 
-        elif result == "poisonous gas":
-            if self.agent.healing_potions > 0:
-                self.nextStepQueue.append(self.lacdas[1])
-
         self.check_agent_status()
 
         self.update_grid()
@@ -240,6 +236,8 @@ class WumpusWorldGUI:
             self.master.quit()
         elif cell_status == "poisonous gas":
             self.display_message("Entered poisonous gas! Health reduced.")
+            if self.agent.healing_potions > 0:
+                self.nextStepQueue.append(self.lacdas[1])
             if self.agent.health <= 0:
                 messagebox.showinfo("Game Over", "You have been killed by the poisonous gas!")
                 self.agent.save_result()
