@@ -2,25 +2,28 @@ import tkinter as tk
 from tkinter import messagebox
 from define import *
 
-
 class Program:
-    def __init__(self):
-        self.map = self.generate_map()
+    def __init__(self, map_file):
+        self.map = self.generate_map(map_file)
         self.wumpus_count_map = self.count_wumpuses()
 
-    def generate_map(self):
-        base_map = [
-            ["-", "-", "WH_PWW", "-", "P", "-", "-", "P_G", "-", "G"],
-            ["-", "-", "-", "-", "-", "-", "-", "-", "-", "-"],
-            ["-", "P", "-", "G", "H_P", "-", "-", "-", "-", "-"],
-            ["-", "GH_P", "WH_P", "-", "G", "-", "P", "-", "-", "-"],
-            ["-", "-", "-", "-", "P_G", "-", "-", "-", "-", "-"],
-            ["H_P", "-", "-", "-", "-", "W", "-", "-", "H_P", "-"],
-            ["P", "-", "-", "-", "W", "WP_GH_P", "-", "-", "-", "-"],
-            ["-", "GH_P", "-", "-", "G", "-", "-", "-", "-", "-"],
-            ["-", "-", "W", "-", "-", "-", "-", "W", "G", "-"],
-            ["A", "-", "-", "P_G", "_", "-", "-", "-", "-", "-"],
-        ]
+    def generate_map(self,map_file):
+        with open(map_file, 'r') as f:
+            lines = f.readlines()
+            
+        base_map = [line.strip().split('.') for line in lines[1:]]  # Bỏ dòng đầu tiên và tách các phần tử theo dấu '.'
+        #base_map = [
+        #    ["-", "-", "WH_PWW", "-", "P", "-", "-", "P_G", "-", "G"],
+        #    ["-", "-", "-", "-", "-", "-", "-", "-", "-", "-"],
+        #    ["-", "P", "-", "G", "H_P", "-", "-", "-", "-", "-"],
+        #    ["-", "GH_P", "WH_P", "-", "G", "-", "P", "-", "-", "-"],
+        #    ["-", "-", "-", "-", "P_G", "-", "-", "-", "-", "-"],
+        #    ["H_P", "-", "-", "-", "-", "W", "-", "-", "H_P", "-"],
+        #    ["P", "-", "-", "-", "W", "WP_GH_P", "-", "-", "-", "-"],
+        #    ["-", "GH_P", "-", "-", "G", "-", "-", "-", "-", "-"],
+        #    ["-", "-", "W", "-", "-", "-", "-", "W", "G", "-"],
+        #    ["A", "-", "-", "P_G", "_", "-", "-", "-", "-", "-"],
+        #]
 
         percept_map = [["" for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)]
 
