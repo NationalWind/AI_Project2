@@ -33,6 +33,7 @@
 (4,5): grab
 (4,6): move forward
 (4,7): move forward
+(4,8): shoot
 (4,8): move forward
 (4,9): move forward
 (4,10): move forward
@@ -44,17 +45,24 @@
 (3,9): turn left
 (3,8): shoot
 (3,8): move forward
+(3,7): shoot
+(3,7): shoot
+(3,7): shoot
 (3,7): move forward
+(3,7): grab
 (3,6): move forward
 (3,6): turn right
 (3,6): turn right
 (3,7): move forward
+(3,7): grab
 (3,7): turn left
 (2,7): move forward
 (2,7): turn right
 (2,7): turn right
 (3,7): move forward
+(3,7): grab
 (4,7): move forward
+(5,7): shoot
 (5,7): move forward
 (5,7): turn left
 (5,8): move forward
@@ -63,56 +71,89 @@
 (5,9): turn left
 (5,9): turn left
 (5,8): move forward
+(5,8): grab
 (5,8): turn left
 (6,8): move forward
-(6,8): turn right
-(6,7): move forward
-(6,6): shoot
-(6,6): shoot
-(6,6): move forward
-(6,6): turn right
-(6,6): turn right
-(6,7): move forward
-(6,7): turn right
-(7,7): shoot
-(7,7): move forward
-(7,7): turn left
-(7,8): move forward
-(7,9): move forward
-(7,10): move forward
-(7,10): turn left
-(6,10): move forward
-(6,10): turn right
-(6,10): turn right
-(7,10): move forward
-(8,10): move forward
-(8,10): turn right
-(8,9): move forward
-(8,8): move forward
-(8,7): move forward
-(8,6): move forward
-(8,5): move forward
-(8,4): move forward
-(8,4): turn right
-(8,4): turn right
-(8,5): move forward
-(8,5): turn left
-(7,5): move forward
-(7,5): turn right
-(7,5): turn right
-(8,5): move forward
+(6,8): turn left
+(6,8): turn left
+(5,8): move forward
+(5,8): grab
+(5,8): turn left
+(5,7): move forward
+(5,6): move forward
+(5,5): shoot
+(5,5): move forward
+(5,4): move forward
+(5,3): move forward
+(5,2): move forward
+(5,1): move forward
+(5,1): turn right
+(4,1): shoot
+(4,1): move forward
+(4,1): turn right
+(4,2): move forward
+(4,3): move forward
+(4,3): turn right
+(5,3): move forward
+(6,3): move forward
+(6,3): grab
+(6,3): turn left
+(6,4): move forward
+(6,4): turn left
+(6,4): turn left
+(6,3): move forward
+(6,2): move forward
+(6,1): shoot
+(6,1): shoot
+(6,1): move forward
+(6,1): turn left
+(7,1): move forward
+(7,1): turn left
+(7,2): shoot
+(7,2): move forward
+(7,3): move forward
+(7,3): turn left
+(7,3): turn left
+(7,2): move forward
+(7,2): turn left
+(8,2): move forward
+(8,2): turn right
+(8,1): move forward
+(8,1): turn left
+(9,1): move forward
+(9,1): turn left
+(9,2): move forward
+(9,3): move forward
+(9,4): move forward
 (9,5): move forward
-(9,5): turn left
 (9,6): move forward
+(9,6): grab
 (9,7): move forward
 (9,8): move forward
 (9,9): move forward
 (9,10): move forward
-(9,10): turn right
-(10,10): move forward
-(10,10): turn right
+(9,10): turn left
+(8,10): move forward
+(8,10): heal
+(8,10): turn left
+(8,9): move forward
+(8,8): move forward
+(8,8): turn right
+(8,8): turn right
+(8,9): move forward
+(8,9): turn left
+(7,9): move forward
+(7,9): turn right
+(7,9): turn right
+(8,9): move forward
+(9,9): move forward
 (10,9): move forward
 (10,9): grab
+(10,9): turn left
+(10,10): move forward
+(10,10): turn left
+(10,10): turn left
+(10,9): move forward
 (10,8): move forward
 (10,7): move forward
 (10,6): move forward
@@ -123,59 +164,53 @@
 (10,1): move forward
 (10,1): grab
 (10,1): turn right
-(9,1): move forward
-(9,1): turn right
-(9,2): move forward
-(9,3): move forward
-(9,3): turn left
-(9,3): turn left
-(9,2): move forward
-(9,2): turn right
-(8,2): move forward
-(8,2): turn left
-(8,1): move forward
-(8,1): turn right
-(7,1): move forward
-(7,1): turn right
-(7,2): shoot
-(7,2): move forward
-(7,3): move forward
-(7,3): turn left
-(7,3): turn left
-(7,2): move forward
-(7,2): turn right
+(10,1): turn right
+(10,2): move forward
+(10,3): move forward
+(10,4): move forward
+(10,4): turn left
+(9,4): move forward
+(8,4): move forward
+(8,4): turn right
+(8,4): turn right
+(9,4): move forward
+(9,4): turn left
+(9,5): move forward
+(9,6): move forward
+(9,6): turn left
+(8,6): move forward
+(7,6): move forward
+(7,6): turn right
+(7,7): shoot
+(7,7): shoot
+(7,7): shoot
+(7,7): shoot
+(7,7): move forward
+(7,7): turn left
+(7,7): turn left
+(7,6): move forward
+(7,5): shoot
+(7,5): move forward
+(7,5): turn right
+(7,5): turn right
+(7,6): move forward
+(7,6): turn left
+(6,6): shoot
+(6,6): shoot
+(6,6): move forward
+(6,6): grab
+(6,6): turn left
+(6,5): move forward
+(6,4): move forward
+(6,3): move forward
 (6,2): move forward
-(6,2): turn left
-(6,1): shoot
-(6,1): shoot
 (6,1): move forward
 (6,1): turn right
 (5,1): move forward
-(5,1): turn right
-(5,2): shoot
-(5,2): move forward
-(5,3): move forward
-(5,4): move forward
-(5,5): move forward
-(5,5): turn left
-(5,5): turn left
-(5,4): move forward
-(5,4): turn left
-(6,4): move forward
-(6,4): turn left
-(6,4): turn left
-(5,4): move forward
-(5,4): turn left
-(5,3): move forward
-(5,3): turn right
-(4,3): move forward
-(4,3): turn left
-(4,2): move forward
 (4,1): move forward
 (4,1): heal
-(4,1): turn right
 (3,1): move forward
 (2,1): move forward
 (1,1): move forward
 (1,1): climb
-Game points: 17550
+Game points: 46370

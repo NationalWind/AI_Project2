@@ -93,25 +93,26 @@ class Program:
 
         # If no more Wumpuses in the cell, remove stench from the Wumpus cell and surrounding cells
         if self.wumpus_count_map[x][y] == 0:
-            self.set_cell_info(x, y, self.get_cell_info(x, y).replace("W", ""))
-            for dx in [-1, 0, 1]:
-                for dy in [-1, 0, 1]:
-                    nx, ny = x + dx, y + dy
-                    if 0 <= nx < GRID_SIZE and 0 <= ny < GRID_SIZE:
-                        for bx in [-1, 0, 1]:
-                            for by in [-1, 0, 1]:
-                                sx, sy = nx + bx, ny + by
-                                if 0 <= sx < GRID_SIZE and 0 <= sy < GRID_SIZE:
-                                    cell_info = self.get_cell_info(sx, sy)
-                                    objects = split_objects(cell_info)
-                                    if "W" not in objects:
-                                        self.set_cell_info(nx, ny, cell_info.replace("S", ""))
-
-    def update_map_after_grab(self, x, y):
-        # Remove glow from the Healing Potions cell
-        for dx in [-1, 0, 1]:
-            for dy in [-1, 0, 1]:
+            # Remove Wumpus from the cell info using the new function
+            cell_info = self.get_cell_info(x, y)
+            updated_cell_info = remove_w_not_in_h_sequence(cell_info)
+            self.set_cell_info(x, y, updated_cell_info)
+            
+            # Check the four main directions (up, down, left, right)
+            directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+            for dx, dy in directions:
                 nx, ny = x + dx, y + dy
                 if 0 <= nx < GRID_SIZE and 0 <= ny < GRID_SIZE:
                     cell_info = self.get_cell_info(nx, ny)
-                    self.set_cell_info(nx, ny, cell_info.replace("G_L", ""))
+                    updated_cell_info = cell_info.replace("S", "")
+                    self.set_cell_info(nx, ny, updated_cell_info)
+
+
+    def update_map_after_grab(self, x, y):
+        # Remove glow from the Healing Potions cell
+        for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+            nx, ny = x + dx, y + dy
+            if 0 <= nx < GRID_SIZE and 0 <= ny < GRID_SIZE:
+                cell_info = self.get_cell_info(nx, ny)
+                self.set_cell_info(nx, ny, cell_info.replace("G_L", ""))
+
