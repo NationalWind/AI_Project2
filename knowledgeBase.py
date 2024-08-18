@@ -33,10 +33,6 @@ class KnowledgeBase:
         # Adds a CNF clause to the knowledge base
         self.clauses = And(self.clauses, (Or(*literals)))
 
-    def add_clause_list(self, literals):
-        # Adds a CNF clause to the knowledge base
-        self.clauses = And(self.clauses, (Or(*literals)))
-
     def add_proposition(self, x, y, prop, value):
         proposition = self.propositions[(x, y, prop)]
         if value:

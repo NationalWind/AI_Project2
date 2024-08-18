@@ -57,7 +57,7 @@ class Agent:
                 if 0 <= nx < GRID_SIZE and 0 <= ny < GRID_SIZE:
                     literals.append(self.kb.propositions[(nx, ny, surr[percept])])
 
-            self.kb.add_clause_list(literals)
+            self.kb.add_clause(*literals)
 
         # Infer new knowledge
         # self.kb.infer()

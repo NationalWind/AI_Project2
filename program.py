@@ -12,11 +12,11 @@ class Program:
         base_map = [
             ["-", "-", "WH_PWW", "-", "P", "-", "-", "P_G", "-", "G"],
             ["-", "-", "-", "-", "-", "-", "-", "-", "-", "-"],
-            ["-", "P", "-", "G", "H_P", "-", "-", "-", "-", "-"],
+            ["-", "-", "-", "-", "H_P", "-", "-", "-", "-", "-"],
             ["-", "GH_P", "WH_P", "-", "G", "-", "P", "-", "-", "-"],
             ["-", "-", "-", "-", "P_G", "-", "-", "-", "-", "-"],
             ["H_P", "-", "-", "-", "-", "W", "-", "-", "H_P", "-"],
-            ["P", "-", "-", "-", "W", "WP_GH_P", "-", "-", "-", "-"],
+            ["P", "-", "P", "-", "W", "WP_GPH_P", "-", "-", "-", "-"],
             ["-", "GH_P", "-", "-", "G", "-", "-", "-", "-", "-"],
             ["-", "-", "W", "-", "-", "-", "-", "W", "G", "-"],
             ["A", "-", "-", "P_G", "_", "-", "-", "-", "-", "-"],
@@ -83,6 +83,7 @@ class Program:
         self.map[x][y] = info
 
     def update_map_after_wumpus_death(self, x, y):
+        print(self.map[7][2], x, y)
         # Reduce the count of Wumpuses in the cell
         if self.wumpus_count_map[x][y] > 0:
             self.wumpus_count_map[x][y] -= 1
@@ -93,16 +94,24 @@ class Program:
             self.set_cell_info(x, y, self.get_cell_info(x, y).replace("W", ""))
             for dx in [-1, 0, 1]:
                 for dy in [-1, 0, 1]:
+                    if (dx, dy) == (0, 0):
+                        continue
                     nx, ny = x + dx, y + dy
                     if 0 <= nx < GRID_SIZE and 0 <= ny < GRID_SIZE:
+                        ok = True
                         for bx in [-1, 0, 1]:
                             for by in [-1, 0, 1]:
+                                if (bx, by) == (0, 0):
+                                    continue
                                 sx, sy = nx + bx, ny + by
                                 if 0 <= sx < GRID_SIZE and 0 <= sy < GRID_SIZE:
                                     cell_info = self.get_cell_info(sx, sy)
                                     objects = split_objects(cell_info)
-                                    if "W" not in objects:
-                                        self.set_cell_info(nx, ny, cell_info.replace("S", ""))
+                                    if "W" in objects:
+                                        ok = False
+                        if ok:
+                            self.set_cell_info(nx, ny, self.get_cell_info(nx, ny).replace("S", ""))
+        print(self.map[7][2])
 
     def update_map_after_grab(self, x, y):
         # Remove glow from the Healing Potions cell
