@@ -110,7 +110,7 @@ class Agent:
         objects = split_objects(cell_info)
         if "G" in objects:
             self.gold_collected = True
-            updated_cell_info = remove_w_not_in_h_sequence(cell_info)
+            updated_cell_info = remove_g_not_in_l_sequence(cell_info)
             self.program.set_cell_info(self.x, self.y, updated_cell_info)
             action_str = f"({self.y + 1},{GRID_SIZE - self.x}): grab"
             self.actions.append(action_str)
