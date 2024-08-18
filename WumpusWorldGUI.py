@@ -27,7 +27,7 @@ class WumpusWorldGUI:
         }
 
         # Status Labels
-        self.message_label = tk.Label(master, text="", fg="blue")
+        self.message_label = tk.Label(master, text="", fg="red")
         self.message_label.pack(side="top", anchor="w", padx=1, pady=10)
         self.health_label = tk.Label(master, text=f"Health: {self.agent.health}", fg="green")
         self.health_label.pack(side="top", anchor="w", padx=10, pady=10)
@@ -56,21 +56,24 @@ class WumpusWorldGUI:
 
         self.nextStepQueue = deque([])
 
-        self.master.after(1, self.nextStep)
+        self.master.after(5, self.nextStep)
 
-        self.lacdas = [lambda: self.on_grab(), lambda: self.on_heal(), lambda: self.master.destroy(), lambda: self.on_turn_right(), lambda: self.on_turn_left(), lambda: self.on_shoot(), lambda: self.on_move_forward()]
+        self.lacdas = [lambda: self.on_grab(), lambda: self.on_heal(), lambda: self.master.destroy(), lambda: self.on_turn_right(), lambda: self.on_turn_left(), lambda: self.on_shoot(), lambda: self.on_move_forward(), lambda: self.on_climb]
     
     
     
     def draw_grid(self):
+        self.grid_rects = []  # Store references to the grid rectangles
         for i in range(GRID_SIZE):
+            row = []
             for j in range(GRID_SIZE):
                 x0 = j * CELL_SIZE
                 y0 = i * CELL_SIZE
                 x1 = x0 + CELL_SIZE
                 y1 = y0 + CELL_SIZE
-                self.canvas.create_rectangle(x0, y0, x1, y1, fill="white")
-                # Optional: Add additional grid lines or other decorations if needed.
+                rect = self.canvas.create_rectangle(x0, y0, x1, y1, fill="gray", outline="black")
+                row.append(rect)
+            self.grid_rects.append(row)
 
     def update_agent_position(self):
         self.canvas.delete("agent")
@@ -100,6 +103,12 @@ class WumpusWorldGUI:
         self.clear_percepts()
         cell_info = self.agent.get_current_info()
         x, y = self.agent.x, self.agent.y
+        
+        # Update the cell color based on the agent's visited cells
+        for i in range(GRID_SIZE):
+            for j in range(GRID_SIZE):
+                if self.agent.visited[i][j]:  # Check if the cell has been visited
+                    self.canvas.itemconfig(self.grid_rects[i][j], fill="white")
         
         # Define the padding (offset) to move the images slightly inside the cell
         padding = 5  # Adjust this value as needed
@@ -152,6 +161,10 @@ class WumpusWorldGUI:
     def display_message(self, message):
         self.message_label.config(text=message, font=("Arial", 14, "bold"), fg="red")
         self.message_label.place(x=300, y= GRID_SIZE * CELL_SIZE + 10)
+        self.master.after(500, self.clear_message)
+    
+    def clear_message(self):
+        self.message_label.config(text="")
 
     def on_turn_left(self, event=None):
         self.agent.turn_left()
@@ -164,11 +177,9 @@ class WumpusWorldGUI:
     def on_move_forward(self, event=None):
         result = self.agent.move_forward()
         if result == "gold":
-            self.display_message("You have entered a cell with Gold!")
             self.nextStepQueue.append(self.lacdas[0])
 
         elif result == "healing potion":
-            self.display_message("You have entered a cell with Healing Potion!")
             self.nextStepQueue.append(self.lacdas[0])
 
         self.check_agent_status()
@@ -177,7 +188,7 @@ class WumpusWorldGUI:
         self.update_agent_position()
 
         if (self.agent.x, self.agent.y) == (9, 0) and self.agent.isReturning == True:
-            self.master.after(2000, self.lacdas[2])
+            self.master.after(5, self.lacdas[7])
 
     def move(self, direction):
         idx = {"up": 0, "right": 1, "down": 2, "left": 3}
@@ -230,7 +241,7 @@ class WumpusWorldGUI:
         if result == "wumpus killed":
             self.display_message("Scream!!")
         elif result == "missed":
-            self.display_message("Missed the shot")
+           pass
         self.update_grid()
         return result
 
@@ -261,12 +272,14 @@ class WumpusWorldGUI:
             self.agent.game_points += SCORE_AGENT_DIED
             self.agent.save_result(self.program.map_file)
             self.master.quit()
+            self.master.destroy()
         elif cell_status == "pit":
             self.display_message("Fell into a pit! You are dead.")
             messagebox.showinfo("Game Over", "You have fallen into a pit!")
             self.agent.game_points += SCORE_AGENT_DIED
             self.agent.save_result(self.program.map_file)
             self.master.quit()
+            self.master.destroy()
         elif cell_status == "poisonous gas":
             self.display_message("Entered poisonous gas! Health reduced.")
             if self.agent.healing_potions > 0:
@@ -318,4 +331,4 @@ class WumpusWorldGUI:
 
             # self.agent.kb.display_knowledge()
 
-        self.master.after(200, self.nextStep)
+        self.master.after(5, self.nextStep)
