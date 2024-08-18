@@ -259,13 +259,13 @@ class WumpusWorldGUI:
             self.display_message("Encountered a Wumpus! You are dead.")
             messagebox.showinfo("Game Over", "You have been killed by the Wumpus!")
             self.agent.game_points += SCORE_AGENT_DIED
-            self.agent.save_result()
+            self.agent.save_result(self.program.map_file)
             self.master.quit()
         elif cell_status == "pit":
             self.display_message("Fell into a pit! You are dead.")
             messagebox.showinfo("Game Over", "You have fallen into a pit!")
             self.agent.game_points += SCORE_AGENT_DIED
-            self.agent.save_result()
+            self.agent.save_result(self.program.map_file)
             self.master.quit()
         elif cell_status == "poisonous gas":
             self.display_message("Entered poisonous gas! Health reduced.")
@@ -273,7 +273,7 @@ class WumpusWorldGUI:
                 self.nextStepQueue.append(self.lacdas[1])
             if self.agent.health <= 0:
                 messagebox.showinfo("Game Over", "You have been killed by the poisonous gas!")
-                self.agent.save_result()
+                self.agent.save_result(self.program.map_file)
                 self.master.quit()
 
     def nextStep(self):
