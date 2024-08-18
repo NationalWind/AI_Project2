@@ -178,8 +178,9 @@ class Agent:
             return "poisonous gas"
         return ""
 
-    def save_result(self):
-        with open("result.txt", "w") as f:
+    def save_result(self, map_file):
+        result_file = map_file.replace("map", "result")
+        with open(result_file, "w") as f:
             for action in self.actions:
                 f.write(f"{action}\n")
             f.write(f"Game points: {self.game_points}\n")

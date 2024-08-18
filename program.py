@@ -4,8 +4,10 @@ from define import *
 
 class Program:
     def __init__(self, map_file):
+        self.map_file = map_file  
         self.map = self.generate_map(map_file)
         self.wumpus_count_map = self.count_wumpuses()
+
 
     def generate_map(self,map_file):
         with open(map_file, 'r') as f:

@@ -239,7 +239,7 @@ class WumpusWorldGUI:
         if result == "climb":
             self.agent.game_points += SCORE_CLIMB_OUT
             self.display_message("Exited the cave!")
-            self.agent.save_result()
+            self.agent.save_result(self.program.map_file)  
             messagebox.showinfo("Win", "You've exited the cave successfully!")
             self.master.quit()
         else:
