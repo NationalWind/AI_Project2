@@ -1,0 +1,9 @@
+(1,2): move forward
+(1,2): turn left
+(1,2): turn left
+(1,1): move forward
+(1,1): turn left
+(2,1): move forward
+(2,1): turn left
+(2,2): move forward
+Game points: -10080
