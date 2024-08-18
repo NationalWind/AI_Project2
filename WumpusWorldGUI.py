@@ -4,21 +4,31 @@ from define import *
 from agent import *
 from bfs import *
 from collections import deque
+from PIL import Image, ImageTk
 
 
 class WumpusWorldGUI:
     def __init__(self, master: tk.Tk, program, agent: Agent):
         self.master = master
         self.master.title("Wumpus World")
-        self.canvas = tk.Canvas(master, width=GRID_SIZE * CELL_SIZE, height=GRID_SIZE * CELL_SIZE)
+        self.canvas = tk.Canvas(master, width=GRID_SIZE * CELL_SIZE, height=GRID_SIZE * CELL_SIZE + 50)
         self.canvas.pack(side="left")
         self.program = program
         self.agent = agent
         self.percept_text_ids = {}
+        self.percept_images = {}
+        
+        # Load percept images
+        self.images = {
+            "S": ImageTk.PhotoImage(Image.open("stench.jpg").resize((20, 20))),
+            "B": ImageTk.PhotoImage(Image.open("breezee.jpg").resize((20, 20))),
+            "W_H": ImageTk.PhotoImage(Image.open("gas.png").resize((22, 22))),
+            "G_L": ImageTk.PhotoImage(Image.open("g_l.png").resize((20, 20)))
+        }
 
         # Status Labels
         self.message_label = tk.Label(master, text="", fg="blue")
-        self.message_label.pack(side="top", anchor="w", padx=10, pady=10)
+        self.message_label.pack(side="top", anchor="w", padx=1, pady=10)
         self.health_label = tk.Label(master, text=f"Health: {self.agent.health}", fg="green")
         self.health_label.pack(side="top", anchor="w", padx=10, pady=10)
         self.arrow_label = tk.Label(master, text=f"Arrows: {self.agent.arrows}", fg="purple")
@@ -34,15 +44,6 @@ class WumpusWorldGUI:
         self.button_frame = tk.Frame(master)
         self.button_frame.pack(side="right", fill="y", padx=10, pady=10)
 
-        self.grab_button = tk.Button(self.button_frame, text="Grab (G)", command=self.on_grab)
-        self.grab_button.pack(pady=5)
-        self.shoot_button = tk.Button(self.button_frame, text="Shoot (S)", command=self.on_shoot)
-        self.shoot_button.pack(pady=5)
-        self.climb_button = tk.Button(self.button_frame, text="Climb (C)", command=self.on_climb)
-        self.climb_button.pack(pady=5)
-        self.heal_button = tk.Button(self.button_frame, text="Heal (H)", command=self.on_heal)
-        self.heal_button.pack(pady=5)
-
         self.draw_grid()
         self.update_agent_position()
         self.master.bind("<Left>", self.on_turn_left)
@@ -55,15 +56,12 @@ class WumpusWorldGUI:
 
         self.nextStepQueue = deque([])
 
-        self.display_usage_instructions()
-        self.master.after(1000, self.nextStep)
+        self.master.after(1, self.nextStep)
 
         self.lacdas = [lambda: self.on_grab(), lambda: self.on_heal(), lambda: self.master.destroy(), lambda: self.on_turn_right(), lambda: self.on_turn_left(), lambda: self.on_shoot(), lambda: self.on_move_forward()]
-
-    def display_usage_instructions(self):
-        instructions = "Arrow Keys: Turn Left/Right\n" "Enter: Move Forward\n"
-        self.message_label.config(text=instructions)
-
+    
+    
+    
     def draw_grid(self):
         for i in range(GRID_SIZE):
             for j in range(GRID_SIZE):
@@ -102,14 +100,48 @@ class WumpusWorldGUI:
         self.clear_percepts()
         cell_info = self.agent.get_current_info()
         x, y = self.agent.x, self.agent.y
+        
+        # Define the padding (offset) to move the images slightly inside the cell
+        padding = 5  # Adjust this value as needed
+
+        # Define the offset for each corner with padding
+        corner_offsets = {
+            "top-left": (padding, padding),
+            "top-right": (CELL_SIZE - self.images["S"].width() - padding, padding),
+            "bottom-left": (padding, CELL_SIZE - self.images["S"].height() - padding),
+            "bottom-right": (CELL_SIZE - self.images["S"].width() - padding, CELL_SIZE - self.images["S"].height() - padding)
+        }
+
+        # Calculate image placement for each corner
         if "S" in cell_info:
-            self.percept_text_ids["S"] = self.canvas.create_text(y * CELL_SIZE + CELL_SIZE / 4, x * CELL_SIZE + CELL_SIZE / 4, text="S", fill="red", font=("Arial", 8))
+            self.percept_images["S"] = self.canvas.create_image(
+                y * CELL_SIZE + corner_offsets["top-left"][0],  # X position
+                x * CELL_SIZE + corner_offsets["top-left"][1],  # Y position
+                image=self.images["S"],
+                anchor="nw"  # Anchor to the top-left corner of the image
+            )
         if "B" in cell_info:
-            self.percept_text_ids["B"] = self.canvas.create_text(y * CELL_SIZE + 3 * CELL_SIZE / 4, x * CELL_SIZE + CELL_SIZE / 4, text="B", fill="blue", font=("Arial", 8))
+            self.percept_images["B"] = self.canvas.create_image(
+                y * CELL_SIZE + corner_offsets["top-right"][0],  # X position
+                x * CELL_SIZE + corner_offsets["top-right"][1],  # Y position
+                image=self.images["B"],
+                anchor="nw"  # Anchor to the top-left corner of the image
+            )
         if "W_H" in cell_info:
-            self.percept_text_ids["W_H"] = self.canvas.create_text(y * CELL_SIZE + CELL_SIZE / 4, x * CELL_SIZE + 3 * CELL_SIZE / 4, text="W_H", fill="gray", font=("Arial", 8))
+            self.percept_images["W_H"] = self.canvas.create_image(
+                y * CELL_SIZE + corner_offsets["bottom-left"][0],  # X position
+                x * CELL_SIZE + corner_offsets["bottom-left"][1],  # Y position
+                image=self.images["W_H"],
+                anchor="nw"  # Anchor to the top-left corner of the image
+            )
         if "G_L" in cell_info:
-            self.percept_text_ids["G_L"] = self.canvas.create_text(y * CELL_SIZE + 3 * CELL_SIZE / 4, x * CELL_SIZE + 3 * CELL_SIZE / 4, text="G_L", fill="red", font=("Arial", 8))
+            self.percept_images["G_L"] = self.canvas.create_image(
+                y * CELL_SIZE + corner_offsets["bottom-right"][0],  # X position
+                x * CELL_SIZE + corner_offsets["bottom-right"][1],  # Y position
+                image=self.images["G_L"],
+                anchor="nw"  # Anchor to the top-left corner of the image
+            )
+
 
         self.health_label.config(text=f"Health: {self.agent.health}")
         self.arrow_label.config(text=f"Arrows: {self.agent.arrows}")
@@ -118,7 +150,8 @@ class WumpusWorldGUI:
         self.potions_label.config(text=f"Healing Potions: {self.agent.healing_potions}")
 
     def display_message(self, message):
-        self.message_label.config(text=message)
+        self.message_label.config(text=message, font=("Arial", 14, "bold"), fg="red")
+        self.message_label.place(x=300, y= GRID_SIZE * CELL_SIZE + 10)
 
     def on_turn_left(self, event=None):
         self.agent.turn_left()
@@ -197,7 +230,7 @@ class WumpusWorldGUI:
         if result == "wumpus killed":
             self.display_message("Scream!!")
         elif result == "missed":
-            self.display_message("Missed the shot.")
+            self.display_message("Missed the shot")
         self.update_grid()
         return result
 
@@ -207,7 +240,7 @@ class WumpusWorldGUI:
             self.agent.game_points += SCORE_CLIMB_OUT
             self.display_message("Exited the cave!")
             self.agent.save_result()
-            messagebox.showinfo("Game Over", "You've exited the cave successfully!")
+            messagebox.showinfo("Win", "You've exited the cave successfully!")
             self.master.quit()
         else:
             self.display_message("Not at the starting position.")
@@ -244,6 +277,11 @@ class WumpusWorldGUI:
                 self.master.quit()
 
     def nextStep(self):
+        # Check if the agent should start climbing out
+        if (self.agent.x, self.agent.y) == (9, 0) and self.agent.isReturning:
+            # Call the climbing method
+            self.on_climb()
+            return
         if not self.agent.isReturning or (self.agent.x, self.agent.y) != (9, 0):
             if self.nextStepQueue:
                 lacda = self.nextStepQueue.popleft()

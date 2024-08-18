@@ -178,7 +178,7 @@ class Agent:
         return ""
 
     def save_result(self):
-        with open("result1.txt", "w") as f:
+        with open("result.txt", "w") as f:
             for action in self.actions:
                 f.write(f"{action}\n")
             f.write(f"Game points: {self.game_points}\n")
