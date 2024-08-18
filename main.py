@@ -7,12 +7,5 @@ from menu import main_menu
 
 
 
-#if __name__ == "__main__":
-#    root = tk.Tk()
-#    program = Program()
-#    print(program.map)
-#    agent = Agent(program)
-#    agent.kb.display_knowledge()
-#    agent.kb.display_knowledge()
-#    app = WumpusWorldGUI(root, program, agent)
-#    root.mainloop()
+if __name__ == "__main__":
+    main_menu()

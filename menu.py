@@ -59,5 +59,3 @@ def main_menu():
     # Run the main loop of the interface
     root.mainloop()
 
-# Run the main menu
-main_menu()
