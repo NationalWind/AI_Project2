@@ -114,6 +114,7 @@ class Agent:
             self.program.set_cell_info(self.x, self.y, updated_cell_info)
             action_str = f"({self.y + 1},{GRID_SIZE - self.x}): grab"
             self.actions.append(action_str)
+            self.game_points += SCORE_ACTION
             return "gold"
         elif "H_P" in cell_info:
             self.healing_potions += 1

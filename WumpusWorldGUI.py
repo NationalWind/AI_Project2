@@ -331,4 +331,4 @@ class WumpusWorldGUI:
 
             # self.agent.kb.display_knowledge()
 
-        self.master.after(5, self.nextStep)
+        self.master.after(100, self.nextStep)
