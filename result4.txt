@@ -12,4 +12,86 @@
 (2,2): shoot
 (2,2): move forward
 (2,1): move forward
-Game points: -10410
+(2,1): turn left
+(3,1): move forward
+(3,1): turn left
+(3,2): move forward
+(3,3): shoot
+(3,3): move forward
+(3,3): grab
+(3,4): move forward
+(3,5): move forward
+(3,6): move forward
+(3,7): move forward
+(3,8): move forward
+(3,9): move forward
+(3,10): move forward
+(3,10): grab
+(3,10): heal
+(3,10): turn right
+(4,10): move forward
+(4,10): turn right
+(4,9): move forward
+(4,9): grab
+(4,8): move forward
+(4,7): move forward
+(4,6): move forward
+(4,5): move forward
+(4,5): grab
+(4,5): heal
+(4,4): move forward
+(4,3): move forward
+(4,2): move forward
+(4,1): move forward
+(4,1): turn left
+(5,1): move forward
+(5,1): turn left
+(5,2): move forward
+(5,3): move forward
+(5,4): move forward
+(5,5): shoot
+(5,5): move forward
+(5,6): move forward
+(5,7): move forward
+(5,7): turn left
+(5,7): turn left
+(5,6): move forward
+(5,6): turn left
+(6,6): move forward
+(6,6): turn left
+(6,6): turn left
+(5,6): move forward
+(5,6): turn left
+(5,5): move forward
+(5,4): move forward
+(5,4): turn left
+(6,4): shoot
+(6,4): shoot
+(6,4): move forward
+(6,4): turn right
+(6,3): move forward
+(6,2): move forward
+(6,1): move forward
+(6,1): turn left
+(7,1): move forward
+(7,1): turn left
+(7,2): move forward
+(7,3): move forward
+(7,3): grab
+(7,3): turn left
+(7,3): turn left
+(7,2): move forward
+(7,2): turn left
+(8,2): move forward
+(8,2): turn right
+(8,1): move forward
+(8,1): turn right
+(7,1): move forward
+(6,1): move forward
+(5,1): move forward
+(4,1): move forward
+(3,1): move forward
+(2,1): move forward
+(1,1): move forward
+(1,1): climb
+Game points: 3350
