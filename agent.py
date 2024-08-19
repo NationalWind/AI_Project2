@@ -4,6 +4,7 @@ from knowledgeBase import *
 from define import *
 from collections import deque
 from program import Program
+from sympy import Equivalent
 
 
 class Agent:
@@ -13,7 +14,7 @@ class Agent:
         self.actions = []
         self.game_points = 0
         self.health = MAX_HEALTH
-        self.gold_collected = False
+        self.gold_collected = 0
         self.arrows = ARROW_COUNT
         self.direction = "up"  # Initial direction
         self.healing_potions = 0  # Track healing potions
@@ -25,6 +26,17 @@ class Agent:
 
     def update_knowledge_base(self, x, y):
         if not self.visited[x][y]:
+            # Define directions
+            directions = {"up": (-1, 0), "down": (1, 0), "left": (0, -1), "right": (0, 1)}
+            # Check adjacent cells
+            surr = {"B": "P", "S": "W", "W_H": "P_G", "G_L": "H_P"}
+            for percept in surr:
+                literals = []
+                for _, (dx, dy) in directions.items():
+                    nx, ny = self.x + dx, self.y + dy
+                    if 0 <= nx < GRID_SIZE and 0 <= ny < GRID_SIZE:
+                        literals.append(self.kb.propositions[(nx, ny, surr[percept])])
+                self.kb.add_clause(to_cnf(Equivalent(self.kb.propositions[(x, y, percept)], Or(*literals))))
             self.visited[x][y] = True
             self.cnt_visited += 1
 
@@ -41,23 +53,6 @@ class Agent:
         self.kb.add_proposition(x, y, "S", "S" in objects)
         self.kb.add_proposition(x, y, "W_H", "W_H" in objects)
         self.kb.add_proposition(x, y, "G_L", "G_L" in objects)
-
-        # Define directions
-        directions = {"up": (-1, 0), "down": (1, 0), "left": (0, -1), "right": (0, 1)}
-
-        # Check adjacent cells
-        surr = {"B": "P", "S": "W", "W_H": "P_G", "G_L": "H_P"}
-        for percept in surr:
-            if not percept in objects:
-                continue
-
-            literals = []
-            for _, (dx, dy) in directions.items():
-                nx, ny = self.x + dx, self.y + dy
-                if 0 <= nx < GRID_SIZE and 0 <= ny < GRID_SIZE:
-                    literals.append(self.kb.propositions[(nx, ny, surr[percept])])
-
-            self.kb.add_clause(*literals)
 
         # Infer new knowledge
         # self.kb.infer()
@@ -109,10 +104,18 @@ class Agent:
         cell_info = self.get_current_info()
         objects = split_objects(cell_info)
         if "G" in objects:
-            self.gold_collected = True
+            self.gold_collected += 1
             self.program.set_cell_info(self.x, self.y, cell_info.replace("G", ""))
             action_str = f"({self.y + 1},{GRID_SIZE - self.x}): grab"
             self.actions.append(action_str)
+
+            self.kb.remove_clause(self.kb.propositions[(self.x, self.y, "G")])
+            directions = {"up": (-1, 0), "down": (1, 0), "left": (0, -1), "right": (0, 1)}
+            for _, (dx, dy) in directions.items():
+                nx, ny = self.x + dx, self.y + dy
+                if 0 <= nx < GRID_SIZE and 0 <= ny < GRID_SIZE:
+                    self.kb.remove_clause(self.kb.propositions[(nx, ny, "G_L")])
+
             return "gold"
         elif "H_P" in cell_info:
             self.healing_potions += 1
@@ -121,7 +124,16 @@ class Agent:
             self.program.update_map_after_grab(self.x, self.y)
             self.actions.append(action_str)
             self.game_points += SCORE_ACTION
+
+            self.kb.remove_clause(self.kb.propositions[(self.x, self.y, "H_P")])
+            directions = {"up": (-1, 0), "down": (1, 0), "left": (0, -1), "right": (0, 1)}
+            for _, (dx, dy) in directions.items():
+                nx, ny = self.x + dx, self.y + dy
+                if 0 <= nx < GRID_SIZE and 0 <= ny < GRID_SIZE:
+                    self.kb.remove_clause(self.kb.propositions[(nx, ny, "G_L")])
+
             return "healing potion"
+
         return ""
 
     def shoot(self):
@@ -144,9 +156,19 @@ class Agent:
                 self.program.update_map_after_wumpus_death(nx, ny)
                 action_str = f"({ny + 1},{GRID_SIZE - nx}): shoot"
                 self.actions.append(action_str)
+
                 return "wumpus killed"
         action_str = f"({ny + 1},{GRID_SIZE - nx}): shoot"
         self.actions.append(action_str)
+
+        # self.kb.remove_clause(self.kb.propositions[(nx, ny, "W")])
+        self.kb.add_clause(Not(self.kb.propositions[(nx, ny, "W")]))
+        directions = {"up": (-1, 0), "down": (1, 0), "left": (0, -1), "right": (0, 1)}
+        for _, (dx, dy) in directions.items():
+            sx, sy = nx + dx, nx + dy
+            if 0 <= sx < GRID_SIZE and 0 <= sy < GRID_SIZE:
+                self.kb.remove_clause(self.kb.propositions[(sx, sy, "S")])
+
         return "missed"
 
     def climb(self):
@@ -178,7 +200,7 @@ class Agent:
         return ""
 
     def save_result(self):
-        with open("result1.txt", "w") as f:
+        with open("result.txt", "w") as f:
             for action in self.actions:
                 f.write(f"{action}\n")
             f.write(f"Game points: {self.game_points}\n")
