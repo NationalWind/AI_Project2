@@ -133,4 +133,4 @@
 (2,1): turn right
 (1,1): move forward
 (1,1): climb
-Game points: 2780
+Game points: 2770

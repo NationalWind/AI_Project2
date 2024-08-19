@@ -36,6 +36,8 @@
 (3,8): move forward
 (3,9): move forward
 (3,10): move forward
+(3,10): grab
+(3,10): heal
 (3,10): turn right
 (4,10): move forward
 (4,10): turn right
@@ -45,6 +47,8 @@
 (4,7): move forward
 (4,6): move forward
 (4,5): move forward
+(4,5): grab
+(4,5): heal
 (4,4): move forward
 (4,3): move forward
 (4,2): move forward
@@ -100,4 +104,4 @@
 (2,1): move forward
 (1,1): move forward
 (1,1): climb
-Game points: 3380
+Game points: 3350
