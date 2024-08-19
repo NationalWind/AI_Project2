@@ -297,6 +297,12 @@ class WumpusWorldGUI:
                             return
                         result = BFS(self.agent)
                         self.path = trace(result)
+                        if not self.path:
+                            messagebox.showinfo("Game Over", "Cannot Return. You will be killed by poisonous gas")
+                            self.agent.save_result(self.program.map_file)
+                            self.master.quit()
+                            self.master.destroy()
+                            return
                         self.path.pop()
 
                 self.agent.last_positions.append(self.path[-1].state)
