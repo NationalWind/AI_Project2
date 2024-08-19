@@ -51,7 +51,7 @@ class WumpusWorldGUI:
 
         self.nextStepQueue = deque([])
 
-        self.master.after(5, self.nextStep)
+        self.master.after(2, self.nextStep)
 
         self.lacdas = [lambda: self.on_grab(), lambda: self.on_heal(), lambda: self.master.destroy(), lambda: self.on_turn_right(), lambda: self.on_turn_left(), lambda: self.on_shoot(), lambda: self.on_move_forward()]
 
@@ -306,4 +306,4 @@ class WumpusWorldGUI:
 
             # self.agent.kb.display_knowledge()
 
-        self.master.after(100, self.nextStep)
+        self.master.after(2, self.nextStep)

@@ -102,7 +102,7 @@ W_4_3 = kb.propositions[(4, 3, "W")]
 W_5_2 = kb.propositions[(5, 2, "W")]
 
 a, b, c, d, e = symbols("a b c d e")
-print(Equivalent(a, b | c | d | e) & a & Not(b | c | d | e))
+# print(Equivalent(a, b | c | d | e) & a & Not(b | c | d | e))
 
 # print(
 #     satisfiable(
