@@ -87,6 +87,7 @@ class Agent:
         return ""
 
     def turn_left(self):
+        self.update_knowledge_base(self.x, self.y)
         directions = ["up", "left", "down", "right"]
         self.direction = directions[(directions.index(self.direction) + 1) % 4]
         action_str = f"({self.y + 1},{GRID_SIZE - self.x}): turn left"
@@ -94,6 +95,7 @@ class Agent:
         self.game_points += SCORE_ACTION
 
     def turn_right(self):
+        self.update_knowledge_base(self.x, self.y)
         directions = ["up", "right", "down", "left"]
         self.direction = directions[(directions.index(self.direction) + 1) % 4]
         action_str = f"({self.y + 1},{GRID_SIZE - self.x}): turn right"
@@ -104,18 +106,15 @@ class Agent:
         cell_info = self.get_current_info()
         objects = split_objects(cell_info)
         if "G" in objects:
-            self.gold_collected += 1
-            self.program.set_cell_info(self.x, self.y, cell_info.replace("G", ""))
+            self.gold_collected = True
+            updated_cell_info = remove_g_not_in_l_sequence(cell_info)
+            self.program.set_cell_info(self.x, self.y, updated_cell_info)
             action_str = f"({self.y + 1},{GRID_SIZE - self.x}): grab"
             self.actions.append(action_str)
+            self.game_points += SCORE_ACTION
 
-            self.kb.remove_clause(self.kb.propositions[(self.x, self.y, "G")])
-            directions = {"up": (-1, 0), "down": (1, 0), "left": (0, -1), "right": (0, 1)}
-            for _, (dx, dy) in directions.items():
-                nx, ny = self.x + dx, self.y + dy
-                if 0 <= nx < GRID_SIZE and 0 <= ny < GRID_SIZE:
-                    self.kb.remove_clause(self.kb.propositions[(nx, ny, "G_L")])
-
+            self.kb.add_clause(Not(self.kb.propositions[(self.x, self.y, "G")]))
+            self.update_knowledge_base(self.x, self.y)
             return "gold"
         elif "H_P" in cell_info:
             self.healing_potions += 1
@@ -125,15 +124,15 @@ class Agent:
             self.actions.append(action_str)
             self.game_points += SCORE_ACTION
 
-            self.kb.remove_clause(self.kb.propositions[(self.x, self.y, "H_P")])
+            self.kb.add_clause(Not(self.kb.propositions[(self.x, self.y, "H_P")]))
             directions = {"up": (-1, 0), "down": (1, 0), "left": (0, -1), "right": (0, 1)}
             for _, (dx, dy) in directions.items():
                 nx, ny = self.x + dx, self.y + dy
                 if 0 <= nx < GRID_SIZE and 0 <= ny < GRID_SIZE:
                     self.kb.remove_clause(self.kb.propositions[(nx, ny, "G_L")])
-
+            self.update_knowledge_base(self.x, self.y)
             return "healing potion"
-
+        self.update_knowledge_base(self.x, self.y)
         return ""
 
     def shoot(self):
@@ -156,7 +155,6 @@ class Agent:
                 self.program.update_map_after_wumpus_death(nx, ny)
                 action_str = f"({ny + 1},{GRID_SIZE - nx}): shoot"
                 self.actions.append(action_str)
-
                 return "wumpus killed"
         action_str = f"({ny + 1},{GRID_SIZE - nx}): shoot"
         self.actions.append(action_str)
@@ -165,9 +163,10 @@ class Agent:
         self.kb.add_clause(Not(self.kb.propositions[(nx, ny, "W")]))
         directions = {"up": (-1, 0), "down": (1, 0), "left": (0, -1), "right": (0, 1)}
         for _, (dx, dy) in directions.items():
-            sx, sy = nx + dx, nx + dy
+            sx, sy = nx + dx, ny + dy
             if 0 <= sx < GRID_SIZE and 0 <= sy < GRID_SIZE:
                 self.kb.remove_clause(self.kb.propositions[(sx, sy, "S")])
+        self.update_knowledge_base(self.x, self.y)
 
         return "missed"
 
@@ -199,8 +198,9 @@ class Agent:
             return "poisonous gas"
         return ""
 
-    def save_result(self):
-        with open("result.txt", "w") as f:
+    def save_result(self, map_file):
+        result_file = map_file.replace("map", "result")
+        with open(result_file, "w") as f:
             for action in self.actions:
                 f.write(f"{action}\n")
             f.write(f"Game points: {self.game_points}\n")

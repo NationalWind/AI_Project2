@@ -59,8 +59,10 @@ class KnowledgeBase:
     def check_consistency(self, proposition):
         # Check if adding the proposition leads to inconsistency
         # proposition = to_cnf(proposition, True)
-        test = satisfiable(And(*self.clauses, Not(proposition)), algorithm="dpll")
+        test = satisfiable(And(*self.clauses, Not(proposition)))
+        # print(test)
         if test is False:
+
             self.add_clause(proposition)
             return True  # Contradiction
         else:

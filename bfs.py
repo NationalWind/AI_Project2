@@ -34,7 +34,7 @@ def BFS(agent: Agent):
                 if (sx, sy) == (9, 0):
                     return child
             else:
-                if not agent.visited[sx][sy]:  # and not agent.kb.isKnown((sx, sy))
+                if not agent.visited[sx][sy] and agent.kb.check_consistency(agent.kb.propositions[(sx, sy, "P")]) == "Unknown":  # and not agent.kb.isKnown((sx, sy))
 
                     # if Not(agent.kb.propositions["W"]) in agent.kb.clauses and Not(agent.kb.propositions["P_G"]) in agent.kb.clauses:
                     if agent.kb.check_consistency(Not(agent.kb.propositions[(sx, sy, "W")])) is True and agent.kb.check_consistency(Not(agent.kb.propositions[(sx, sy, "P_G")])) is True and agent.kb.check_consistency(Not(agent.kb.propositions[(sx, sy, "P")])) is True:
@@ -49,7 +49,7 @@ def BFS(agent: Agent):
                         results.append(("d", child))
             if reached[sx][sy] is None:
                 reached[sx][sy] = child
-                if agent.isReturning or (((agent.healing_potions > 0 and shealth >= 50) or shealth >= 75) and child.path_cost <= 5):
+                if agent.isReturning or (((agent.healing_potions > 0 and shealth >= 50) or shealth >= 75) and child.path_cost <= 3):
                     frontier.append(child)
 
     if results:
@@ -76,7 +76,7 @@ def expand(node, agent: Agent, for_start=False) -> list[Node]:
             if agent.isReturning:
                 # print(child.state)
                 if agent.visited[sx][sy] and shealth >= 25:
-                    print(sx, sy, agent.kb.check_consistency(agent.kb.propositions[(sx, sy, "P_G")]), health, shealth)
+                    # print(sx, sy, agent.kb.check_consistency(agent.kb.propositions[(sx, sy, "P_G")]), health, shealth)
                     children.append(child)
             else:
                 children.append(child)

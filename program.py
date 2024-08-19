@@ -5,6 +5,7 @@ from define import *
 
 class Program:
     def __init__(self, map_file):
+        self.map_file = map_file
         self.map = self.generate_map(map_file)
         self.wumpus_count_map = self.count_wumpuses()
 
@@ -95,33 +96,44 @@ class Program:
 
         # If no more Wumpuses in the cell, remove stench from the Wumpus cell and surrounding cells
         if self.wumpus_count_map[x][y] == 0:
-            self.set_cell_info(x, y, self.get_cell_info(x, y).replace("W", ""))
-            for dx in [-1, 0, 1]:
-                for dy in [-1, 0, 1]:
-                    if (dx, dy) == (0, 0):
-                        continue
-                    nx, ny = x + dx, y + dy
-                    if 0 <= nx < GRID_SIZE and 0 <= ny < GRID_SIZE:
-                        ok = True
-                        for bx in [-1, 0, 1]:
-                            for by in [-1, 0, 1]:
-                                if (bx, by) == (0, 0):
-                                    continue
-                                sx, sy = nx + bx, ny + by
-                                if 0 <= sx < GRID_SIZE and 0 <= sy < GRID_SIZE:
-                                    cell_info = self.get_cell_info(sx, sy)
-                                    objects = split_objects(cell_info)
-                                    if "W" in objects:
-                                        ok = False
-                        if ok:
-                            self.set_cell_info(nx, ny, self.get_cell_info(nx, ny).replace("S", ""))
-        print(self.map[7][2])
+            # Remove Wumpus from the cell info using the new function
+            cell_info = self.get_cell_info(x, y)
+            updated_cell_info = remove_w_not_in_h_sequence(cell_info)
+            self.set_cell_info(x, y, updated_cell_info)
+
+            # Check the four main directions (up, down, left, right)
+            directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+            for dx, dy in directions:
+                nx, ny = x + dx, y + dy
+                if 0 <= nx < GRID_SIZE and 0 <= ny < GRID_SIZE:
+                    ok = True
+                    for bx, by in directions:
+                        sx, sy = nx + bx, ny + by
+                        if 0 <= sx < GRID_SIZE and 0 <= sy < GRID_SIZE:
+                            cell_info = self.get_cell_info(sx, sy)
+                            objects = split_objects(cell_info)
+                            if "W" in objects:
+                                ok = False
+                    if ok:
+                        cell_info = self.get_cell_info(nx, ny)
+                        updated_cell_info = cell_info.replace("S", "")
+                        self.set_cell_info(nx, ny, updated_cell_info)
 
     def update_map_after_grab(self, x, y):
         # Remove glow from the Healing Potions cell
-        for dx in [-1, 0, 1]:
-            for dy in [-1, 0, 1]:
-                nx, ny = x + dx, y + dy
-                if 0 <= nx < GRID_SIZE and 0 <= ny < GRID_SIZE:
+        for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+            nx, ny = x + dx, y + dy
+            if 0 <= nx < GRID_SIZE and 0 <= ny < GRID_SIZE:
+                ok = True
+                directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+                for bx, by in directions:
+                    sx, sy = nx + bx, ny + by
+                    if 0 <= sx < GRID_SIZE and 0 <= sy < GRID_SIZE:
+                        cell_info = self.get_cell_info(sx, sy)
+                        objects = split_objects(cell_info)
+                        if "H_P" in objects:
+                            ok = False
+                if ok:
                     cell_info = self.get_cell_info(nx, ny)
-                    self.set_cell_info(nx, ny, cell_info.replace("G_L", ""))
+                    updated_cell_info = cell_info.replace("G_L", "")
+                    self.set_cell_info(nx, ny, updated_cell_info)
