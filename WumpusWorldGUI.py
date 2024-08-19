@@ -156,8 +156,8 @@ class WumpusWorldGUI:
         self.update_grid()
         self.update_agent_position()
 
-        if (self.agent.x, self.agent.y) == (9, 0) and self.agent.isReturning == True:
-            self.master.after(5, self.lacdas[7])
+        # if (self.agent.x, self.agent.y) == (9, 0) and self.agent.isReturning == True:
+        #     self.master.after(5, self.lacdas[7])
 
     def move(self, direction):
         idx = {"up": 0, "right": 1, "down": 2, "left": 3}
